@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY")
 
 def search_matcha_cafes(location: str, radius=3000):
     url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
@@ -13,7 +13,7 @@ def search_matcha_cafes(location: str, radius=3000):
     params = {
         "query": f"matcha cafe near {location}",
         "radius": radius,
-        "key": GOOGLE_API_KEY,
+        "key": GOOGLE_PLACES_API_KEY,
     }
 
     response = requests.get(url, params=params)

@@ -1,0 +1,2 @@
+Suggest a matcha drink and a vibe for someone feeling ${mood} in ${location} and keep it to under 25 words with sentence beginning with 'Drink:'.
+Keep the vibe description under 100 words. Use emoji where possible in the vibe description to sell the drink and feeling but don't over do it.

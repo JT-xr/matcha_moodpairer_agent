@@ -1,15 +1,17 @@
 # app.py
 
+import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+
 import streamlit as st
 from mood_drink_map import get_drink_for_mood
 from cafe_search import search_matcha_cafes
+from string import Template
 
-from smolagents import ToolCallingAgent
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
 
 load_dotenv()
+genai.configure(api_key=os.getenv("GOOGLE_GEMINI_API_KEY"))
 
 # Streamlit UI
 st.set_page_config(page_title="Matcha Mood Pairer 🍵", page_icon="🍵")
@@ -23,7 +25,17 @@ mood = st.selectbox(
     ["chill", "anxious", "creative", "reflective", "energized", "cozy"]
 )
 
-location = st.text_input("Where are you located?", "Brooklyn, NY")
+st.markdown("### 📍 Choose a location")
+
+boroughs = ["Brooklyn, NY", "Manhattan, NY", "Queens, NY", "Other"]
+selected_borough = st.selectbox("Pick a borough", boroughs)
+
+custom_location = ""
+if selected_borough == "Other":
+    custom_location = st.text_input("Enter a location")
+    location = custom_location
+else:
+    location = selected_borough
 
 if not location.strip():
     st.warning("Please enter a valid location.")
@@ -44,33 +56,16 @@ if st.button("Find my matcha pairing"):
         else:
             st.warning("No matcha cafés found near that location.")
 
-        if cafes:
-            st.markdown("---")
+        # Generate a message with Gemini
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        with open("templates/prompt_template_gemini.txt") as f:
+            template = Template(f.read())
+            prompt = template.substitute(mood=mood, location=location)
+            print(prompt)
 
-            # Format cafes for the agent
-            cafe_text = "\n".join([f"- {c['name']} ({c.get('rating', '?')}⭐) - {c['address']}" for c in cafes[:5]])
-
-            # Load prompt
-            with open("templates/prompt_template.txt") as f:
-                template = f.read()
-
-            prompt = template.replace("{{ mood }}", mood)\
-                            .replace("{{ location }}", location)\
-                            .replace("{{ drink }}", drink)\
-                            .replace("{{ cafes }}", cafe_text)
-
-            openai_key = os.getenv("OPENAI_API_KEY")
-            if not openai_key:
-                st.error("Missing OpenAI API key. Please check your .env file.")
-                st.stop()
-
-            # Run SmolAgent
-            client = OpenAI(api_key=openai_key)
-            agent = ToolCallingAgent(
-                tools=[],  # you can define tools here later if needed
-                model=client.chat
-            )
-            response = agent.run(prompt)
-
-            st.markdown("🧠 **Your Matcha Concierge Says:**")
-            st.write(response)
+        try:
+            response = model.generate_content(prompt)
+            st.markdown("🧠 **Gemini Recommendation:**")
+            st.write(response.text)
+        except Exception as e:
+            st.error(f"Gemini error: {e}")

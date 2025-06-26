@@ -1,0 +1,4 @@
+# Activate the virtual environment to ensure the app uses the correct dependencies.
+source venv/bin/activate
+streamlit run app.py
+python test_gemini.py
