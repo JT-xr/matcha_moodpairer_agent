@@ -1,0 +1,4 @@
+- Add current date and time
+- Add current weather
+- Add current astrology sign
+- Add generative image below description 
