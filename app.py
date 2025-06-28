@@ -111,3 +111,23 @@ if st.button("Find my matcha pairing"):
 
         st.markdown("**🖼️ Your Matcha Mood Image:** _(placeholder)_")
         st.image("https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=60", caption="Matcha Vibe")
+
+
+# Chat interface
+st.markdown("---")
+st.markdown("### 💬 Chat with Whiski")
+
+st.image("bot.png", width=64)
+
+def get_matcha_response(prompt):
+    try:
+        chat_model = genai.GenerativeModel("gemini-1.5-flash")
+        response = chat_model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"Gemini error: {e}"
+
+if prompt := st.chat_input("Ask me about Matcha!"):
+    st.chat_message("user").write(prompt)
+    response = get_matcha_response(prompt)
+    st.chat_message("assistant").markdown(f"**Whiski 🧠:** {response}")
