@@ -1,4 +1,15 @@
-# Activate the virtual environment to ensure the app uses the correct dependencies.
-source venv/bin/activate
+
 streamlit run app.py
 python test_gemini.py
+
+#Navigate to main project
+cd ~/Desktop/James\ Projects/GitHub/matcha_moodpairer_agent
+
+# Activate the virtual environment to ensure the app uses the correct dependencies.
+source venv/bin/activate
+
+#Upload in HuggingFace
+git add .
+git commit -m "Your update message"
+git push
+
