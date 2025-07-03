@@ -170,3 +170,5 @@ if prompt := st.chat_input("Ask me about Matcha!"):
     st.chat_message("user").write(prompt)
     response = agent.run(prompt)
     st.chat_message("assistant").markdown(f"**Whiski 🧠:** {response}")
+
+

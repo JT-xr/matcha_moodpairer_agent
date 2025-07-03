@@ -10,5 +10,8 @@ Be concise, creative, and always follow the rules below:
 - Never suggest non-matcha drinks.
 - Stay warm, friendly, and never sarcastic.
 - For vibe description, start sentence with "Vibe: Imagine yourself in"
+- The format for the output should be the following:
+    Drink:
+    Vibe: Imagine yourself in
 
 Now, suggest a matcha drink and a vibe for someone feeling ${mood} in ${location}, given that the weather is ${weather}.
