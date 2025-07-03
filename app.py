@@ -1,7 +1,6 @@
 # app.py
 
 import os
-import google.generativeai as genai
 import streamlit as st
 import datetime
 import requests
@@ -9,10 +8,10 @@ from mood_drink_map import get_drink_for_mood
 from cafe_search import search_matcha_cafes
 from string import Template
 from dotenv import load_dotenv
+from whiski_agent import agent
 
 
 load_dotenv()
-genai.configure(api_key=os.getenv("GOOGLE_GEMINI_API_KEY"))
 
 # Streamlit UI
 st.set_page_config(page_title="Matcha Mood Mix 🍵", page_icon="🍵")
@@ -54,6 +53,7 @@ vibes = {
     "☕": "cozy"
 }
 
+# Styling for buttons
 st.markdown(
     """
     <style>
@@ -110,6 +110,7 @@ st.markdown("<style>div[data-testid='stMarkdownContainer'] h3 { margin-bottom: 0
 boroughs = ["Brooklyn, NY", "Manhattan, NY", "Queens, NY", "Other"]
 selected_borough = st.selectbox("", boroughs)
 
+
 custom_location = ""
 if selected_borough == "Other":
     custom_location = st.text_input("Enter a location")
@@ -139,22 +140,23 @@ if st.button("Find my matcha pairing"):
         else:
             st.warning("No matcha cafés found near that location.")
 
-        # Generate a message with Gemini
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        with open("templates/prompt_template_gemini.txt") as f:
-            template = Template(f.read())
-            prompt = template.substitute(mood=mood, location=location)
-            print(prompt)
-        st.markdown("---")
-        try:
-            response = model.generate_content(prompt)
-            st.markdown("🧠 **Whiski's Advice:**")
-            st.write(response.text)
-        except Exception as e:
-            st.error(f"Gemini error: {e}")
+        # ── Use our SmolAgent/Whiski agent for matcha pairing ──
+        # Load and fill our prompt template
+        template_path = os.path.join(os.path.dirname(__file__), "templates", "prompt_template_gemini.txt")
+        with open(template_path, "r") as tf:
+            template = tf.read()
+        # Assume the template uses {mood}, {location}, and {weather} placeholders
+        filled_task = template.format(
+            mood=mood,
+            location=location,
+            weather=get_nyc_weather()
+        )
+        response = agent.run(filled_task)
+        st.markdown("🧠 **Whiski's Recommendation:**")
+        st.write(response)
 
         st.markdown("Mood Image:")
-        st.image("matcha_cafe.jpeg", caption="Matcha Vibe")
+        st.image("matcha_cafe.png", caption="Matcha Vibe")
 
 
 # Chat interface
@@ -163,15 +165,8 @@ st.markdown("### 💬 Chat with Whiski")
 
 st.image("bot.png", width=64)
 
-def get_matcha_response(prompt):
-    try:
-        chat_model = genai.GenerativeModel("gemini-1.5-flash")
-        response = chat_model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        return f"Gemini error: {e}"
 
 if prompt := st.chat_input("Ask me about Matcha!"):
     st.chat_message("user").write(prompt)
-    response = get_matcha_response(prompt)
+    response = agent.run(prompt)
     st.chat_message("assistant").markdown(f"**Whiski 🧠:** {response}")
