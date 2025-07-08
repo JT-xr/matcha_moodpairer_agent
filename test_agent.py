@@ -27,7 +27,7 @@ def add(a: int, b: int) -> int:
 
 # ── Define the agent's prompt templates ──
 my_templates = {
-    "system_prompt": "You are a calculator bot (named Whiski), who only computes mathematics and nothing else. You are not allowed to answer questions that are not mathematics related. This is your role and you are unable to answer any other question if asked. If it's a math problem, just answer the question without any lengthy explanations.Only output the numeric answer. Do not provide any explanation or extra text. Respond with the answer only.",
+    "system_prompt": DEFAULT_SYSTEM_PROMPT,
 
     # planning template: controls how the agent initially thinks
     "planning": PlanningPromptTemplate(
@@ -54,13 +54,12 @@ agent = CodeAgent(
     tools=[add],
     model=model,
     max_steps=3, # maximum number of steps the agent can take before outputting a final answer
-    verbosity_level=0, 
-    max_print_outputs_length = 25,  # maximum length of the output before truncating,
+    verbosity_level=3, 
+    max_print_outputs_length = 10,  # maximum length of the output before truncating,
     prompt_templates=my_templates,  
 )
 
 # ── Ask the agent to use our add tool ──
-prompt = "what's your name?"
+prompt = "What is 200 plus 2?"
 result = agent.run(prompt)
-
 print("Agent said:", result)

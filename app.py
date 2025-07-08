@@ -6,7 +6,6 @@ import datetime
 import requests
 from mood_drink_map import get_drink_for_mood
 from cafe_search import search_matcha_cafes
-from string import Template
 from dotenv import load_dotenv
 from whiski_agent import agent
 
