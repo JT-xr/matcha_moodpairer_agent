@@ -72,7 +72,7 @@ agent = CodeAgent(
     model=model,
     max_steps=3,
     verbosity_level=3, #controls how much "thinking" info the agent logs 0-3, 3 is most verbose
-    max_print_outputs_length = 10,  # maximum length of the output before truncating,
+    max_print_outputs_length = 150,  # maximum length of the output before truncating,
     prompt_templates=my_templates,  
 )
 
