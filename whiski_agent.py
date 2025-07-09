@@ -71,7 +71,7 @@ agent = CodeAgent(
     tools=[get_drink_for_mood_tool,search_matcha_cafes_tool, duck_tool],
     model=model,
     max_steps=1,
-    verbosity_level=0, #controls how much "thinking" info the agent logs 0-3, 3 is most verbose
+    verbosity_level=1, #controls how much "thinking" info the agent logs 0-3, 3 is most verbose
     max_print_outputs_length = 10,  # maximum length of the output before truncating,
     prompt_templates=my_templates,  
 )
