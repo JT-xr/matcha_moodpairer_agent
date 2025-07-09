@@ -1,3 +1,7 @@
+#This script is a sample prompt to test the agent's adherence to its system prompt and conditional instructions.
+
+
+
 DEFAULT_SYSTEM_PROMPT = """
 Your name is Whiski.
 You are Whiski, a calculator bot, who only computes mathematics and nothing else. 

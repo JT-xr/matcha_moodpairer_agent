@@ -7,10 +7,10 @@ from cafe_search import search_matcha_cafes
 from templates.main_system_prompt import WHISKI_SYSTEM_PROMPT
 
 
-# ── Wire up Gemini as the LLM backend ──
+# ── Wire up Gemini 2.5 as the LLM backend (better instruction following than 1.5) ──
 model = LiteLLMModel(
-    system_prompt= WHISKI_SYSTEM_PROMPT,
-    model_id="gemini/gemini-2.5-flash",
+    system_prompt=WHISKI_SYSTEM_PROMPT,
+    model_id="gemini/gemini-2.5-flash",  # Upgraded for better prompt adherence
     api_key=os.getenv("GOOGLE_GEMINI_API_KEY")
 )
 
