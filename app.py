@@ -8,17 +8,18 @@ from mood_drink_map import get_drink_for_mood
 from cafe_search import search_matcha_cafes
 from dotenv import load_dotenv
 from whiski_agent import agent
-
+from splashpage import show_welcomepage
 
 load_dotenv()
 
 # Streamlit UI
 st.set_page_config(page_title="Matcha Mood Mix 🍵", page_icon="🍵")
 
+# Show welcome page before main content
+show_welcomepage()
 
 st.title("Whiski")
 st.subheader("The matcha AI Agent here to help you find the perfect drink and cafe based on your mood!")
-
 
 
 # 📅 Current date and time
