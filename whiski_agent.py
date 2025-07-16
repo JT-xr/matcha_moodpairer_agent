@@ -11,7 +11,9 @@ from templates.main_system_prompt import WHISKI_SYSTEM_PROMPT
 model = LiteLLMModel(
     system_prompt=WHISKI_SYSTEM_PROMPT,
     model_id="gemini/gemini-2.5-flash",  # Upgraded for better prompt adherence
-    api_key=os.getenv("GOOGLE_GEMINI_API_KEY")
+    api_key=os.getenv("GOOGLE_GEMINI_API_KEY"),
+    timeout=30,  # 30 second timeout
+    max_retries=3,  # Retry up to 3 times on failure
 )
 
 
@@ -59,8 +61,8 @@ my_templates = {
     
     # final_answer: how the final response is formatted
     "final_answer": FinalAnswerPromptTemplate(
-        pre_messages="🧠 **Hi, I'm happy to help!**\n",
-        post_messages="\n\n🍵 *Enjoy your matcha journey!*"
+        pre_messages="",
+        post_messages=""
     ),
 }
 
@@ -70,9 +72,9 @@ my_templates = {
 agent = CodeAgent(
     tools=[get_drink_for_mood_tool,search_matcha_cafes_tool, duck_tool],
     model=model,
-    max_steps=3,
-    verbosity_level=0, #controls how much "thinking" info the agent logs 0-3, 3 is most verbose
-    max_print_outputs_length = 150,  # maximum length of the output before truncating,
+    max_steps=2,
+    verbosity_level=1, #controls how much "thinking" info the agent logs 0-3, 3 is most verbose
+    max_print_outputs_length = 300,  # maximum length of the output before truncating,
     prompt_templates=my_templates,  
 )
 
@@ -83,15 +85,6 @@ if __name__ == "__main__":
     
     # Test 1: Simple greeting
     print("Test 1: Simple greeting")
-    resp1 = agent.run("What is your name?")
+    resp1 = agent.run("code?")
     print(f"Response: {resp1}\n")
     
-    # Test 2: Mood-based recommendation (uses tools)
-    print("Test 2: Mood-based recommendation")
-    resp2 = agent.run("I'm feeling anxious, can you recommend a matcha drink?")
-    print(f"Response: {resp2}\n")
-    
-    # Test 3: Location-based search (uses tools)
-    print("Test 3: Location-based search")
-    resp3 = agent.run("Find me matcha cafes in Brooklyn")
-    print(f"Response: {resp3}\n")
