@@ -2,12 +2,12 @@
 
 import os
 import streamlit as st
-import requests
 from mood_drink_map import get_drink_for_mood
 from cafe_search import search_matcha_cafes
 from dotenv import load_dotenv
 from whiski_agent import agent
 from splashpage import show_welcomepage
+from weather_api import get_nyc_weather
 
 load_dotenv()
 
@@ -17,27 +17,14 @@ st.set_page_config(page_title="Whiski", page_icon="🍵")
 # Show welcome page before main content
 show_welcomepage()
 
-st.title("Whiski")
-st.subheader("The matcha AI Agent helps you find the perfect drink and cafe based on your mood!")
-
-#🌤️ Weather in NYC
-def get_nyc_weather():
-    try:
-        weather_resp = requests.get(
-            "https://api.open-meteo.com/v1/forecast?latitude=40.7128&longitude=-74.0060&current_weather=true"
-        ).json()
-        temp = weather_resp["current_weather"]["temperature"]
-        return f"{temp}°C"
-    except Exception:
-        return "Weather unavailable"
-
-st.markdown(f"**🌤️ Weather:** {get_nyc_weather()}")
-
+st.markdown('<h1 style="font-size: 75px;">Whiski</h1>', unsafe_allow_html=True)
+st.markdown('<h3 style="color: black;">The matcha AI Agent helps you find the perfect drink and cafe based on your mood!</h3>', unsafe_allow_html=True)
 
 
 # Mood selection with emojis
 st.markdown("### ✨ Pick your Vibe")
 
+#
 vibes = {
     "😌": "chill",
     "😰": "anxious",
@@ -57,6 +44,7 @@ st.markdown(
         margin: 0.01rem;
         border-radius: 100px;
         width: 55%;
+        color: black; 
     }
     </style>
     """,
@@ -84,7 +72,7 @@ mood = st.session_state.selected_mood
 
 
 
-# Inputs
+# Mood options mapping
 mood_options = {
     "😌 chill": "chill",
     "😰 anxious": "anxious",
@@ -93,8 +81,6 @@ mood_options = {
     "⚡ energized": "energized",
     "☕ cozy": "cozy"
 }
-
-
 
 
 
@@ -157,12 +143,12 @@ if st.button("Find my matcha pairing"):
 st.markdown("---")
 st.markdown("### 💬 Chat with Whiski")
 
-st.image("bot.png", width=64)
+st.image("bot.png", width=100,output_format="PNG")
 
 
 if prompt := st.chat_input("Ask me about Matcha!"):
     st.chat_message("user").write(prompt)
     response = agent.run(prompt)
-    st.chat_message("assistant").markdown(f"**Whiski 🧠:** {response}")
+    st.chat_message("assistant").markdown(f'<span style="color: black;">**Whiski 🧠:**</span> {response}', unsafe_allow_html=True)
 
 

@@ -30,11 +30,12 @@ def show_welcomepage():
                 transform: translateX(-50%);
                 padding: 0.25rem 2rem;
                 font-size: 1.2rem;
-                background-color: #9ACD32;
-                color: white;
+                background-color: White;
+                color: Black;
                 border: none;
                 border-radius: 50px;
                 cursor: pointer;
+                
               }
             </style>
             """,
@@ -53,6 +54,6 @@ def show_welcomepage():
 
 
 if __name__ == "__main__":
-    show_splash()
+    show_welcomepage()
     # Demo main
     st.write("Splash dismissed, now in main app")
