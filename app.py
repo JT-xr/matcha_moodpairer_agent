@@ -1,13 +1,16 @@
 # app.py
-
+# Core Streamlit framework for web app
 import os
 import streamlit as st
-from mood_drink_map import get_drink_for_mood
-from cafe_search import search_matcha_cafes
-from dotenv import load_dotenv
-from whiski_agent import agent
-from splashpage import show_welcomepage
-from weather_api import get_nyc_weather
+
+# Custom modules for app functionality
+from mood_drink_map import get_drink_for_mood  # Maps user moods to recommended drinks
+from cafe_search import search_matcha_cafes  # Searches for matcha cafes by location
+from dotenv import load_dotenv  # Loads environment variables from .env file
+from whiski_agent import agent  # AI agent for matcha recommendations and chat
+from splashpage import show_welcomepage  # Displays welcome/landing page
+from weather_api import get_nyc_weather  # Fetches current NYC weather data
+from location_cards import display_expandable_cafe_cards  # UI component for cafe display
 
 load_dotenv()
 
@@ -34,7 +37,7 @@ vibes = {
     "☕": "cozy"
 }
 
-# Styling for buttons
+# General styling for all buttons
 st.markdown(
     """
     <style>
@@ -51,7 +54,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Use two rows of three columns for better grid layout
+# UI - Grid of buttons for each mood
 emoji_grid = list(vibes.items())
 for row in range(2):
     cols = st.columns(3)
@@ -88,8 +91,7 @@ mood_options = {
 st.markdown("### 📍 Choose a location")
 st.markdown("<style>div[data-testid='stMarkdownContainer'] h3 { margin-bottom: 0.00rem !important; }</style>", unsafe_allow_html=True)
 boroughs = ["Brooklyn, NY", "Manhattan, NY", "Queens, NY", "Other"]
-selected_borough = st.selectbox("", boroughs)
-
+selected_borough = st.radio("", boroughs)
 
 custom_location = ""
 if selected_borough == "Other":
@@ -114,9 +116,7 @@ if st.button("Find my matcha pairing"):
         st.success(f"Success!")
 
         if cafes:
-            st.markdown(f"📍 **Nearby Cafés ({len(cafes)} found):**")
-            for c in cafes[:5]:
-                st.markdown(f"- **{c['name']}** — {c['address']} ({c.get('rating', '?')}⭐)\n[View on Maps]({c['map_link']})")
+            display_expandable_cafe_cards(cafes)
         else:
             st.warning("No matcha cafés found near that location.")
 
@@ -144,8 +144,6 @@ st.markdown("---")
 st.markdown("### 💬 Chat with Whiski")
 
 st.image("bot.png", width=100,output_format="PNG")
-
-
 if prompt := st.chat_input("Ask me about Matcha!"):
     st.chat_message("user").write(prompt)
     response = agent.run(prompt)
