@@ -3,13 +3,13 @@ import streamlit as st
 def display_expandable_cafe_cards(cafes):
     """Display cafes using expandable cards with buttons"""
     if cafes:
-        st.markdown(f"📍 **Nearby Cafés ({min(len(cafes), 5)} shown):**")
+        st.markdown(f"📍 **Nearby Cafés ({min(len(cafes), 3)} shown):**")
         
         # Option 3: Expandable Cards (Column Control)
         col1, col2, col3 = st.columns([2.5, 1, 1])  # Adjust ratios as needed
         
         with col1:  # Main content in left column
-            for i, cafe in enumerate(cafes[:5]):  # Add [:5] here to limit to 5 cafes
+            for i, cafe in enumerate(cafes[:3]):  # Changed from [:5] to [:3]
                 with st.expander(f"🍵 {cafe['name']} ⭐ {cafe.get('rating', '?')}"):
                     st.markdown(f"""
                     <div style="line-height: 1.2;">

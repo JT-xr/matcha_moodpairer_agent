@@ -132,11 +132,32 @@ if st.button("Find my matcha pairing"):
             weather=get_nyc_weather()
         )
         response = agent.run(filled_task)
-        st.markdown("🧠 **Whiski's Recommendation:**")
-        st.write(response)
+        
+        # Option 3: Split Layout (Text + Image Side by Side)
+        col1, col2 = st.columns([3, 2])
 
-        st.markdown("Mood Image:")
-        st.image("matcha_cafe.png", caption="Matcha Vibe")
+        with col1:
+            st.markdown(f"""
+            <div style="
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                border-left: 5px solid #4CAF50;
+                height: 100%;
+            ">
+                <h3 style="color: #2c3e50; margin-top: 0;">🧠 Whiski's Recommendation</h3>
+                <div style="background: #e8f5e8; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                    <strong>🍵 Drink:</strong> {drink}
+                </div>
+                <div style="background: #fff; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <strong>✨ Vibe:</strong><br>
+                    {response}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col2:
+            st.image("matcha_cafe.png", caption="Matcha Vibe", width=400)
 
 
 # Chat interface
