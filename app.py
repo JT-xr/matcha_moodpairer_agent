@@ -161,10 +161,11 @@ if st.button("Find my matcha pairing"):
 
 
 # Chat interface
-st.markdown("---")
+st.markdown("")
+st.markdown('<hr style="margin: 100px;">', unsafe_allow_html=True)
 st.markdown("### 💬 Chat with Whiski")
 
-st.image("bot.png", width=100,output_format="PNG")
+st.image("bot.png", width=120,output_format="PNG")
 if prompt := st.chat_input("Ask me about Matcha!"):
     st.chat_message("user").write(prompt)
     response = agent.run(prompt)
