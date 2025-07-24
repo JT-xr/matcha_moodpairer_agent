@@ -1,18 +1,19 @@
-# app.py
-# Core Streamlit framework for web app
 import os
 import streamlit as st
 
 # Custom modules for app functionality
-from mood_drink_map import get_drink_for_mood  # Maps user moods to recommended drinks
 from cafe_search import search_matcha_cafes  # Searches for matcha cafes by location
 from dotenv import load_dotenv  # Loads environment variables from .env file
 from whiski_agent import agent  # AI agent for matcha recommendations and chat
 from splashpage import show_welcomepage  # Displays welcome/landing page
 from weather_api import get_nyc_weather  # Fetches current NYC weather data
 from location_cards import display_expandable_cafe_cards  # UI component for cafe display
-
 load_dotenv()
+
+
+
+#___________________
+
 
 # Streamlit UI
 st.set_page_config(page_title="Whiski", page_icon="🍵")
@@ -37,6 +38,8 @@ vibes = {
     "☕": "cozy"
 }
 
+
+#___________________
 
 # General styling for all buttons
 st.markdown(
@@ -69,6 +72,10 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+
+
+#___________________
 
 
 # UI - Grid of buttons for each mood
@@ -107,7 +114,7 @@ if "selected_mood" not in st.session_state:
 mood = st.session_state.selected_mood
 
 
-
+#___________________
 
 
 # UI - Visual for Location
@@ -127,12 +134,12 @@ if not location.strip():
     st.warning("Please enter a valid location.")
     st.stop()
 
+#___________________
 
 
 # On button click
 if st.button("Find my matcha pairing"):
     with st.spinner("Brewing your matcha vibe..."):
-        drink = get_drink_for_mood(mood)
         cafes = search_matcha_cafes(location)
         
         st.markdown("---")
@@ -155,6 +162,29 @@ if st.button("Find my matcha pairing"):
             weather=get_nyc_weather()
         )
         response = agent.run(filled_task)
+
+        # Parse the agent response to extract drink and vibe
+        drink_line = ""
+        vibe_content = ""
+
+        # Look for "Drink:" and "Vibe:" patterns in the text
+        import re
+
+        drink_match = re.search(r'Drink:\s*([^.]*\.?[^V]*?)(?=\s*Vibe:|$)', response)
+        vibe_match = re.search(r'Vibe:\s*(.*?)(?=$)', response)
+
+        if drink_match:
+            drink_line = drink_match.group(1).strip()
+        if vibe_match:
+            vibe_content = vibe_match.group(1).strip()
+
+   
+
+        # Fallback if parsing fails
+        if not drink_line:
+            drink_line = "Classic matcha latte"
+        if not vibe_content:
+            vibe_content = response
         
         # Option 3: Split Layout (Text + Image Side by Side)
         col1, col2 = st.columns([3, 2])
@@ -170,17 +200,21 @@ if st.button("Find my matcha pairing"):
             ">
                 <h3 style="color: #2c3e50; margin-top: 0;">🧠 Whiski's Recommendation</h3>
                 <div style="background: #e8f5e8; padding: 10px; border-radius: 8px; margin: 10px 0;">
-                    <strong>🍵 Drink:</strong> {drink}
+                    <strong>🍵 Drink:</strong> {drink_line}
                 </div>
                 <div style="background: #fff; padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <strong>✨ Vibe:</strong><br>
-                    {response}
+                    {vibe_content}
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
         with col2:
             st.image("matcha_cafe.png", caption="Matcha Vibe", width=400)
+
+
+
+#___________________
 
 
 # Chat interface
