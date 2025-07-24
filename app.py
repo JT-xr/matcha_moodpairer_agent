@@ -27,7 +27,7 @@ st.markdown('<h3 style="color: black;">The matcha AI Agent helps you find the pe
 # Mood selection with emojis
 st.markdown("### ✨ Pick your Vibe")
 
-#
+# Define mood vibes with emojis
 vibes = {
     "😌": "chill",
     "😰": "anxious",
@@ -36,6 +36,7 @@ vibes = {
     "⚡": "energized",
     "☕": "cozy"
 }
+
 
 # General styling for all buttons
 st.markdown(
@@ -49,10 +50,26 @@ st.markdown(
         width: 55%;
         color: black; 
     }
+    
+    /* Style for selected button */
+    .stButton>button[data-selected="true"] {
+        background-color: black !important;
+        color: white !important;
+        border: 2px solid black !important;
+    }
+    
+    /* Keep the button highlighted when clicked */
+    .stButton>button:focus {
+        background-color: black !important;
+        color: white !important;
+        border: 2px solid black !important;
+        outline: none !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
 
 # UI - Grid of buttons for each mood
 emoji_grid = list(vibes.items())
@@ -65,8 +82,24 @@ for row in range(2):
             button_label = f"{emoji} {label}"
             with cols[col]:
                 container = st.container()
+                # Check if this button is the selected one
+                is_selected = st.session_state.get('selected_mood', '') == label
+                
+                # Add custom styling for selected button
+                if is_selected:
+                    st.markdown(f"""
+                    <style>
+                    div[data-testid="stButton"]:has(button:contains("{button_label}")) button {{
+                        background-color: black !important;
+                        color: white !important;
+                        border: 2px solid black !important;
+                    }}
+                    </style>
+                    """, unsafe_allow_html=True)
+                
                 if container.button(button_label, key=f"mood_{label}"):
                     st.session_state.selected_mood = label
+                    st.rerun()  # Force a rerun to update the styling
 
 if "selected_mood" not in st.session_state:
     st.session_state.selected_mood = list(vibes.values())[0]  # Default
@@ -75,19 +108,9 @@ mood = st.session_state.selected_mood
 
 
 
-# Mood options mapping
-mood_options = {
-    "😌 chill": "chill",
-    "😰 anxious": "anxious",
-    "🎨 creative": "creative",
-    "🧘 reflective": "reflective",
-    "⚡ energized": "energized",
-    "☕ cozy": "cozy"
-}
 
 
-
-# Location handling
+# UI - Visual for Location
 st.markdown("### 📍 Choose a location")
 st.markdown("<style>div[data-testid='stMarkdownContainer'] h3 { margin-bottom: 0.00rem !important; }</style>", unsafe_allow_html=True)
 boroughs = ["Brooklyn, NY", "Manhattan, NY", "Queens, NY", "Other"]
@@ -113,7 +136,7 @@ if st.button("Find my matcha pairing"):
         cafes = search_matcha_cafes(location)
         
         st.markdown("---")
-        st.success(f"Success!")
+        #st.success(f"Success!")
 
         if cafes:
             display_expandable_cafe_cards(cafes)
