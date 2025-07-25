@@ -10,6 +10,7 @@ SCENES = {
     'WELCOME': 'welcome',
     'MOOD_SELECTION': 'mood_selection',
     'LOCATION_INPUT': 'location_input',
+    'LOADING': 'loading',
     'RESULTS': 'results',
     'CAFE_DETAILS': 'cafe_details',
     'CHAT': 'chat'
@@ -28,6 +29,10 @@ def init_session_state():
     
     if 'user_location' not in st.session_state:
         st.session_state.user_location = None
+    
+    # Legacy compatibility - keep both keys for now
+    if 'selected_location' not in st.session_state:
+        st.session_state.selected_location = None
     
     if 'weather_data' not in st.session_state:
         st.session_state.weather_data = None

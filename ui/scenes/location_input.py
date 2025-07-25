@@ -4,6 +4,9 @@ Allows users to select or enter their location.
 """
 
 import streamlit as st
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from styles import get_scene_header_style
 from ..components.progress_bar import render_progress_bar
 from ..components.buttons import render_location_button_list
@@ -26,7 +29,7 @@ def render_location_input_scene():
     # Render location button list
     render_location_button_list(
         locations, 
-        target_scene=SCENES['RESULTS'],  # Will change to loading scene
+        target_scene=SCENES['LOADING'],
         custom_scene='custom_location'
     )
     
@@ -64,7 +67,7 @@ def render_custom_location_scene():
     render_navigation_buttons(
         back_scene=SCENES['LOCATION_INPUT'],
         back_label="← Back",
-        continue_scene=SCENES['RESULTS'],  # Will change to loading scene
+        continue_scene=SCENES['LOADING'],
         continue_label="Continue →",
         continue_condition=bool(custom_loc.strip()),
         error_message="Please enter a location",
@@ -74,3 +77,5 @@ def render_custom_location_scene():
     # Store custom location if provided
     if custom_loc.strip():
         st.session_state.user_location = custom_loc
+        # Also set legacy key for compatibility
+        st.session_state.selected_location = custom_loc

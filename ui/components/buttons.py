@@ -45,6 +45,8 @@ def render_location_button_list(locations, target_scene, custom_scene=None, sess
                     navigate_to_scene(custom_scene)
                 else:
                     st.session_state[session_key] = location
+                    # Also set legacy key for compatibility
+                    st.session_state.selected_location = location
                     navigate_to_scene(target_scene)
 
 def render_action_button(label, action, button_type="secondary", key_suffix="", full_width=False):

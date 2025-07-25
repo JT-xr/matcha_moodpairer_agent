@@ -4,6 +4,9 @@ Provides interactive chat with the AI agent using real backend integration.
 """
 
 import streamlit as st
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from styles import get_scene_header_style
 from ..components.progress_bar import render_progress_bar
 from ..components.navigation import render_action_buttons
@@ -109,37 +112,41 @@ def initialize_chat_history():
         ]
 
 def render_chat_scene():
-    """Render the chat interface scene"""
-    render_progress_bar(4, total_steps=4)  # Keep at step 4 since this is an additional feature
+    """Render the chat interface scene matching the mockup design"""
+    render_progress_bar(4, total_steps=4)
     
-    # Scene header
-    st.markdown(get_scene_header_style(
-        "💬 Chat with Whiski",
-        "Ask me anything about matcha, cafés, or your recommendations!",
-        font_size="42px"
-    ), unsafe_allow_html=True)
+    # Clean, centered header design matching mockup
+    st.markdown("""
+    <div style="text-align: center; padding: 20px;">
+        <h2 style="color: #557937ff; font-size: 42px; margin-bottom: 15px;">💬 Chat with Whiski</h2>
+        <p style="font-size: 18px; color: #666;">Ask me anything about matcha, cafés, or your recommendations!</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Initialize chat history
     initialize_chat_history()
     
-    # Chat interface
-    st.markdown("---")
+    # Center the bot image like in the mockup
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        try:
+            st.image("bot.png", width=700)
+        except:
+            # Fallback if bot.png not found
+            st.markdown("""
+            <div style="text-align: center; padding: 40px;">
+                <div style="font-size: 150px;">🤖</div>
+                <p style="color: #557937ff; font-weight: bold;">Whiski</p>
+            </div>
+            """, unsafe_allow_html=True)
     
-    # Display chat history
-    for message in st.session_state.chat_history:
-        if message["role"] == "user":
-            st.chat_message("user").write(message["content"])
-        else:
-            st.chat_message("assistant").markdown(
-                f'<span style="color: black;">**Whiski 🧠:**</span> {message["content"]}', 
-                unsafe_allow_html=True
-            )
+    # Add some spacing
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    # Chat input
+    # Chat input at the bottom (matching mockup style)
     if prompt := st.chat_input("Type Here!"):
         # Add user message to history
         st.session_state.chat_history.append({"role": "user", "content": prompt})
-        st.chat_message("user").write(prompt)
         
         # Get context for AI
         context = {
@@ -155,33 +162,42 @@ def render_chat_scene():
         
         # Add assistant response to history
         st.session_state.chat_history.append({"role": "assistant", "content": response})
-        st.chat_message("assistant").markdown(
-            f'<span style="color: black;">**Whiski 🧠:**</span> {response}', 
-            unsafe_allow_html=True
-        )
         st.rerun()
     
-    # Navigation buttons
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    actions = [
-        {
-            'label': '← Back',
-            'action': lambda: navigate_to_scene(SCENES['RESULTS']),
-            'key': 'back_to_results_chat'
-        },
-        {
-            'label': '📍 View Cafés',
-            'action': lambda: navigate_to_scene(SCENES['CAFE_DETAILS']),
-            'key': 'view_cafes_chat'
-        },
-        {
-            'label': '🔄 New Search',
-            'action': lambda: reset_chat_and_restart(),
-            'key': 'new_search_chat'
-        }
-    ]
+    # Display chat history in a clean format (only if there are messages beyond welcome)
+    if len(st.session_state.chat_history) > 1:
+        st.markdown("---")
+        st.markdown("**Chat History:**")
+        
+        for message in st.session_state.chat_history[1:]:  # Skip the welcome message
+            if message["role"] == "user":
+                st.markdown(f"""
+                <div style="background: #f0f2f6; padding: 10px; border-radius: 10px; margin: 10px 0; text-align: right;">
+                    <strong>You:</strong> {message["content"]}
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div style="background: #e8f5e8; padding: 10px; border-radius: 10px; margin: 10px 0;">
+                    <strong>🤖 Whiski:</strong> {message["content"]}
+                </div>
+                """, unsafe_allow_html=True)
     
-    render_action_buttons(actions, "chat")
+    # Navigation buttons matching mockup style (3 buttons in a row)
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("← Back", key="back_chat", use_container_width=True):
+            navigate_to_scene(SCENES['RESULTS'])
+    
+    with col2:
+        if st.button("📍 View Cafés", key="view_cafes_chat", use_container_width=True):
+            navigate_to_scene(SCENES['CAFE_DETAILS'])
+    
+    with col3:
+        if st.button("🔄 New Search", key="new_search_chat", use_container_width=True):
+            reset_chat_and_restart()
 
 def reset_chat_and_restart():
     """Reset session including chat history and start over"""

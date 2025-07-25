@@ -5,6 +5,9 @@ Displays AI-generated matcha recommendations using real backend integration.
 
 import streamlit as st
 import time
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from styles import get_scene_header_style
 from ..components.progress_bar import render_progress_bar
 from ..components.cards import render_recommendation_card, render_loading_card
@@ -13,16 +16,17 @@ from ..utils import SCENES, navigate_to_scene
 
 # Import real backend modules
 try:
-    from whiski_agent import WhiskiAgent
-    from weather_api import get_weather_data
+    from whiski_agent import agent  # Import the actual agent instance
+    from weather_api import get_nyc_weather
+    # from mood_drink_map import get_drink_for_mood  # No longer needed since agent provides drink
     BACKEND_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     BACKEND_AVAILABLE = False
-    st.warning("Backend modules not available - using fallback mode")
+    # Backend modules not available - will use fallback mode
 
 def get_ai_recommendation(mood, location, weather_data=None):
     """
-    Get AI recommendation using real Whiski agent
+    Get AI recommendation using real Whiski agent and the proper template
     
     Args:
         mood (str): Selected mood
@@ -32,41 +36,47 @@ def get_ai_recommendation(mood, location, weather_data=None):
     Returns:
         dict: Recommendation with 'drink' and 'vibe' keys
     """
-    if not BACKEND_AVAILABLE:
-        return get_fallback_recommendation(mood)
     
-    try:
-        agent = WhiskiAgent()
-        
-        # Construct prompt for agent
-        prompt = f"""
-        User is feeling {mood} and is located in {location}.
-        {f"Current weather: {weather_data}" if weather_data else ""}
-        
-        Please recommend a specific matcha drink and describe the perfect café vibe/atmosphere for this mood and location.
-        
-        Format your response as:
-        DRINK: [specific matcha drink recommendation]
-        VIBE: [detailed atmospheric description]
-        """
-        
-        response = agent.run(prompt)
-        
-        # Parse response (this is a simplified parser - you may need to adjust based on your agent's output format)
-        drink = "Custom Matcha Recommendation"
-        vibe = response
-        
-        if "DRINK:" in response and "VIBE:" in response:
-            parts = response.split("VIBE:")
-            drink_part = parts[0].replace("DRINK:", "").strip()
-            vibe_part = parts[1].strip()
-            drink = drink_part if drink_part else drink
-            vibe = vibe_part if vibe_part else vibe
-        
-        return {"drink": drink, "vibe": vibe}
-        
-    except Exception as e:
-        st.error(f"Error getting AI recommendation: {e}")
+    # Try to get AI-generated recommendation using template
+    if BACKEND_AVAILABLE:
+        try:
+            # Get weather context
+            weather_context = get_nyc_weather() if weather_data is None else weather_data
+            
+            # Load and fill the prompt template
+            import os
+            template_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "templates", "prompt_template_gemini.txt")
+            with open(template_path, "r") as tf:
+                template = tf.read()
+                
+            # Fill template with actual values
+            filled_task = template.format(
+                mood=mood,
+                location=location,
+                weather=weather_context
+            )
+            
+            # Get response from agent
+            response = agent.run(filled_task)
+            
+            # Parse the agent response to extract drink and vibe
+            import re
+            drink_match = re.search(r'Drink:\s*([^.]*\.?[^V]*?)(?=\s*Vibe:|$)', response)
+            vibe_match = re.search(r'Vibe:\s*(.*?)(?=$)', response, re.DOTALL)
+            
+            if drink_match and vibe_match:
+                ai_drink = drink_match.group(1).strip()
+                ai_vibe = vibe_match.group(1).strip()
+                return {"drink": ai_drink, "vibe": ai_vibe}
+            else:
+                # If parsing fails, use fallback
+                return get_fallback_recommendation(mood)
+            
+        except Exception as e:
+            # Use fallback if agent fails
+            return get_fallback_recommendation(mood)
+    else:
+        # Backend not available, use full fallback
         return get_fallback_recommendation(mood)
 
 def get_fallback_recommendation(mood):
@@ -127,28 +137,34 @@ def show_loading_process():
 def render_results_scene():
     """Render the results/recommendation scene"""
     # Check if we need to generate recommendation
-    if 'drink_recommendation' not in st.session_state:
-        # Show loading screen
-        if show_loading_process():
-            # Get user data
-            mood = st.session_state.get('selected_mood', 'chill')
-            location = st.session_state.get('user_location', 'Unknown')
-            
-            # Get weather data if available
-            weather_data = None
-            if BACKEND_AVAILABLE:
-                try:
-                    weather_data = get_weather_data(location)
-                    st.session_state.weather_data = weather_data
-                except Exception as e:
-                    st.warning(f"Could not get weather data: {e}")
-            
-            # Get AI recommendation
+    if 'drink_recommendation' not in st.session_state or st.session_state.drink_recommendation is None:
+        # Get user data first
+        mood = st.session_state.get('selected_mood', 'chill')
+        location = st.session_state.get('user_location', 'Unknown')
+        
+        # Get weather data
+        weather_data = None
+        if BACKEND_AVAILABLE:
+            try:
+                weather_data = get_nyc_weather()  # Get current NYC weather
+                st.session_state.weather_data = weather_data
+            except Exception as e:
+                # Weather API failed - continue without weather data
+                pass
+        
+        # Get AI recommendation (with fallback)
+        try:
             recommendation = get_ai_recommendation(mood, location, weather_data)
-            st.session_state.drink_recommendation = recommendation['drink']
-            st.session_state.vibe_description = recommendation['vibe']
-            
-            st.rerun()
+            if recommendation and 'drink' in recommendation and 'vibe' in recommendation:
+                st.session_state.drink_recommendation = recommendation['drink']
+                st.session_state.vibe_description = recommendation['vibe']
+            else:
+                raise Exception("Invalid recommendation format")
+        except Exception as e:
+            # Force fallback
+            fallback = get_fallback_recommendation(mood)
+            st.session_state.drink_recommendation = fallback['drink'] 
+            st.session_state.vibe_description = fallback['vibe']
     
     # Show progress bar
     render_progress_bar(4)
@@ -169,8 +185,11 @@ def render_results_scene():
     
     with col1:
         # Render recommendation card
-        drink = st.session_state.get('drink_recommendation', 'Matcha recommendation')
-        vibe = st.session_state.get('vibe_description', 'Perfect vibe for you!')
+        drink = st.session_state.get('drink_recommendation') or "Matcha recommendation loading..."
+        vibe = st.session_state.get('vibe_description') or "Perfect vibe coming right up!"
+        
+
+        
         render_recommendation_card(drink, vibe)
     
     with col2:

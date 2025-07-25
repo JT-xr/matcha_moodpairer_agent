@@ -4,6 +4,9 @@ Displays the splash page and start button.
 """
 
 import streamlit as st
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from styles import apply_welcome_styles
 from ..components.buttons import render_start_button
 from ..utils import SCENES

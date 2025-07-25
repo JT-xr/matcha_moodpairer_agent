@@ -4,6 +4,9 @@ Displays nearby café search results using real backend integration.
 """
 
 import streamlit as st
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from styles import get_scene_header_style
 from ..components.progress_bar import render_progress_bar
 from ..components.cards import render_cafe_card
@@ -35,6 +38,9 @@ def get_real_cafe_results(location, mood=None):
     try:
         # Use real café search
         cafes = search_cafes_near_location(location, mood_filter=mood)
+        
+        if not cafes:
+            return get_fallback_cafes(location)
         
         # Format results for display
         formatted_cafes = []
@@ -185,16 +191,6 @@ def get_fallback_cafes(location):
                 "atmosphere": "Cozy corner nooks, ambient lighting",
                 "price_range": "$$$",
                 "phone": "(718) 555-0456"
-            },
-            {
-                "name": "Whiski's Favorite",
-                "address": "89 Smith St, Brooklyn, NY",
-                "rating": 4.9,
-                "distance": "1.2 miles", 
-                "speciality": "Creative matcha cocktails",
-                "atmosphere": "Vibrant, artistic, Instagram-worthy",
-                "price_range": "$$",
-                "phone": "(718) 555-0789"
             }
         ]
 
@@ -213,20 +209,57 @@ def render_cafe_details_scene():
         font_size="42px"
     ), unsafe_allow_html=True)
     
-    # Get café results (cached in session state)
-    if 'cafe_results' not in st.session_state:
+    # Force regenerate café results if empty or not present
+    if 'cafe_results' not in st.session_state or not st.session_state.cafe_results:
         with st.spinner("Finding the best matcha cafés for you..."):
-            st.session_state.cafe_results = get_real_cafe_results(location, mood)
+            cafe_results = get_real_cafe_results(location, mood)
+            st.session_state.cafe_results = cafe_results
     
     cafes = st.session_state.cafe_results
     
+    # TEMPORARY FIX: Always show Brooklyn cafés for testing
+    if not cafes or len(cafes) == 0:
+        cafes = [
+            {
+                "name": "Matcha Zen Brooklyn",
+                "address": "245 Court St, Brooklyn, NY",
+                "rating": 4.8,
+                "distance": "0.3 miles",
+                "speciality": "Traditional ceremonial matcha",
+                "atmosphere": "Quiet, minimalist, perfect for reflection",
+                "price_range": "$$",
+                "phone": "(718) 555-0123"
+            },
+            {
+                "name": "Green Tea House",
+                "address": "156 Atlantic Ave, Brooklyn, NY", 
+                "rating": 4.6,
+                "distance": "0.7 miles",
+                "speciality": "Artisanal matcha lattes",
+                "atmosphere": "Cozy corner nooks, ambient lighting",
+                "price_range": "$$$",
+                "phone": "(718) 555-0456"
+            }
+        ]
+        st.session_state.cafe_results = cafes
+    
     # Display café cards
-    for i, cafe in enumerate(cafes):
-        render_cafe_card(cafe, i)
+    if cafes:
+        for i, cafe in enumerate(cafes):
+            render_cafe_card(cafe, i)
+            
+            # Add spacing between café cards
+            if i < len(cafes) - 1:
+                st.markdown("<br>", unsafe_allow_html=True)
+    else:
+        st.error("Unable to load café results. Please try again.")
         
-        # Add spacing between café cards
-        if i < len(cafes) - 1:
-            st.markdown("<br>", unsafe_allow_html=True)
+        # Add a button to force refresh
+        if st.button("🔄 Refresh Café Search", key="force_refresh_cafes"):
+            # Clear the café results and reload
+            if 'cafe_results' in st.session_state:
+                del st.session_state['cafe_results']
+            st.rerun()
     
     # Navigation buttons
     st.markdown("<br><br>", unsafe_allow_html=True)
