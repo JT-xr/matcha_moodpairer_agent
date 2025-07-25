@@ -85,23 +85,76 @@ def show_progress_bar(step, total_steps=4):
 
 def show_welcome_scene():
     """Scene 1: Welcome/Landing"""
-    st.markdown("""
-    <div class="scene-container">
-        <h1 style="font-size: 80px; margin-bottom: 20px;">🍵</h1>
-        <h1 style="color: #4CAF50; font-size: 60px; margin-bottom: 20px;">Whiski</h1>
-        <p style="font-size: 24px; color: #666; margin-bottom: 40px;">
-            Your AI matcha mood pairer
-        </p>
-        <p style="font-size: 18px; color: #888; margin-bottom: 40px;">
-            Discover the perfect matcha drink and café vibe<br>
-            tailored to your mood and location
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Full-screen splash image styling (similar to splashpage.py)
+    st.markdown(
+        """
+        <style>
+          .stApp {
+            background-color: #bdcb9aff;
+          }
+          .splash-img {
+            display: flex;
+            justify-content: center;
+            align-items: top;
+            height: 100vh;
+          }
+          .splash-img > img {
+            width: 75vw;
+            height: 75vh;
+            object-fit: cover;
+          }
+          .start-splash-button {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.75rem 3rem;
+            font-size: 1.5rem;
+            background-color: white;
+            color: black;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+          }
+          .start-splash-button:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+          }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Full-screen splash image
+    try:
+        st.image("Welcome_Image2.PNG", use_container_width=True)
+    except:
+        # Fallback if image not found
+        st.markdown("""
+        <div class="scene-container">
+            <h1 style="color: #4CAF50; font-size: 60px; margin-bottom: 20px;">Whiski</h1>
+            <p style="font-size: 24px; color: #666; margin-bottom: 20px;">
+                Your AI matcha mood pairer
+            </p>
+            <h1 style="font-size: 80px; text-align: center; margin: 20px 0;">🍵</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Custom styled start button positioned at bottom
+    st.markdown(
+        """
+        <div style="position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 1000;">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
-    col1, col2, col3 = st.columns([1, 1, 1])
+    # Use a container to position the button
+    col1, col2, col3 = st.columns([2, 1, 2])
     with col2:
-        if st.button("🚀 START YOUR JOURNEY", key="start_btn", type="primary", use_container_width=True):
+        if st.button("🚀 Start", key="start_btn", use_container_width=True):
             st.session_state.page = 'mood'
             st.rerun()
 
@@ -145,12 +198,9 @@ def show_location_scene():
     show_progress_bar(2)
     
     st.markdown(f"""
-    <div class="scene-container">
+    <div style="text-align: center; padding: 20px 20px 30px 20px;">
         <h2 style="font-size: 48px; margin-bottom: 20px;">📍 Where are you?</h2>
-        <p style="font-size: 20px; color: #666; margin-bottom: 20px;">
-            You're feeling <strong>{st.session_state.selected_mood}</strong>
-        </p>
-        <p style="font-size: 18px; color: #888; margin-bottom: 40px;">
+        <p style="font-size: 18px; color: #666; margin-bottom: 30px;">
             Select your location to find nearby matcha cafés
         </p>
     </div>
@@ -249,7 +299,7 @@ def show_results_scene():
     
     st.markdown("""
     <div style="text-align: center; padding: 30px;">
-        <h1 style="color: #4CAF50; font-size: 60px; margin-bottom: 20px;">🎉 Perfect Match!</h1>
+        <h1 style="color: ##557937ff; font-size: 60px; margin-bottom: 20px;">🎉 Perfect Match!</h1>
         <p style="font-size: 20px; color: #666;">Here's your personalized matcha experience</p>
     </div>
     """, unsafe_allow_html=True)
@@ -303,7 +353,7 @@ def show_results_scene():
             border-left: 5px solid #4CAF50;
             height: 100%;
         ">
-            <h3 style="color: #2c3e50; margin-top: 0;">🧠 Whiski's Recommendation</h3>
+            <h3 style="color: #2c3e50; margin-top: 0;">🧠 Whiski's Choice</h3>
             <div style="background: #e8f5e8; padding: 10px; border-radius: 8px; margin: 10px 0;">
                 <strong>🍵 Drink:</strong> {recommendation['drink']}
             </div>
@@ -341,7 +391,7 @@ def show_results_scene():
             st.rerun()
     
     with col3:
-        if st.button("💬 Chat with Whiski", key="chat", use_container_width=True):
+        if st.button("💬 Chat", key="chat", use_container_width=True):
             st.session_state.page = 'chat'  # Navigate to chat page
             st.rerun()
     
@@ -354,7 +404,7 @@ def show_chat_scene():
     
     st.markdown("""
     <div style="text-align: center; padding: 20px;">
-        <h2 style="color: #4CAF50; font-size: 42px; margin-bottom: 15px;">💬 Chat with Whiski</h2>
+        <h2 style="color: #557937ff; font-size: 42px; margin-bottom: 15px;">💬 Chat with Whiski</h2>
         <p style="font-size: 18px; color: #666;">Ask me anything about matcha, cafés, or your recommendations!</p>
     </div>
     """, unsafe_allow_html=True)
@@ -379,7 +429,7 @@ def show_chat_scene():
             st.chat_message("assistant").markdown(f'<span style="color: black;">**Whiski 🧠:**</span> {message["content"]}', unsafe_allow_html=True)
     
     # Chat input
-    if prompt := st.chat_input("Ask me about matcha, cafés, or your recommendations!"):
+    if prompt := st.chat_input("Type Here!"):
         # Add user message to history
         st.session_state.chat_history.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
@@ -406,7 +456,7 @@ def show_chat_scene():
     col1, col2, col3 = st.columns([1, 1, 1])
     
     with col1:
-        if st.button("← Back to Results", key="back_to_results_chat", use_container_width=True):
+        if st.button("← Back", key="back_to_results_chat", use_container_width=True):
             st.session_state.page = 'results'
             st.rerun()
     
@@ -430,44 +480,148 @@ def show_cafe_results_scene():
     
     st.markdown(f"""
     <div style="text-align: center; padding: 20px;">
-        <h2 style="color: #4CAF50; font-size: 42px; margin-bottom: 15px;">📍 Nearby Cafés</h2>
+        <h2 style="color: #666; font-size: 42px; margin-bottom: 15px;">📍 Nearby Cafés</h2>
         <p style="font-size: 18px; color: #666;">Perfect spots for your <strong>{st.session_state.selected_mood}</strong> vibe in <strong>{st.session_state.selected_location}</strong></p>
     </div>
     """, unsafe_allow_html=True)
     
     # Mock café data (would come from your cafe_search.py)
-    mock_cafes = [
-        {
-            "name": "Matcha Zen Brooklyn",
-            "address": "245 Court St, Brooklyn, NY",
-            "rating": 4.8,
-            "distance": "0.3 miles",
-            "speciality": "Traditional ceremonial matcha",
-            "atmosphere": "Quiet, minimalist, perfect for reflection",
-            "price_range": "$$",
-            "phone": "(718) 555-0123"
-        },
-        {
-            "name": "Green Tea House",
-            "address": "156 Atlantic Ave, Brooklyn, NY", 
-            "rating": 4.6,
-            "distance": "0.7 miles",
-            "speciality": "Artisanal matcha lattes",
-            "atmosphere": "Cozy corner nooks, ambient lighting",
-            "price_range": "$$$",
-            "phone": "(718) 555-0456"
-        },
-        {
-            "name": "Whiski's Favorite",
-            "address": "89 Smith St, Brooklyn, NY",
-            "rating": 4.9,
-            "distance": "1.2 miles", 
-            "speciality": "Creative matcha cocktails",
-            "atmosphere": "Vibrant, artistic, Instagram-worthy",
-            "price_range": "$$",
-            "phone": "(718) 555-0789"
-        }
-    ]
+    # Generate location-appropriate mock data
+    location = st.session_state.selected_location.lower() if st.session_state.selected_location else "brooklyn, ny"
+    
+    if "culver city" in location or "california" in location:
+        mock_cafes = [
+            {
+                "name": "Matcha & Co Culver City",
+                "address": "9600 Culver Blvd, Culver City, CA",
+                "rating": 4.7,
+                "distance": "0.4 miles",
+                "speciality": "Organic ceremonial matcha",
+                "atmosphere": "Modern, bright, California casual",
+                "price_range": "$$$",
+                "phone": "(424) 555-0156"
+            },
+            {
+                "name": "Venice Beach Matcha House",
+                "address": "1234 Washington Blvd, Culver City, CA", 
+                "rating": 4.5,
+                "distance": "0.8 miles",
+                "speciality": "Coconut matcha lattes",
+                "atmosphere": "Beachy vibes, outdoor seating",
+                "price_range": "$$",
+                "phone": "(424) 555-0287"
+            },
+            {
+                "name": "Green Garden Tea",
+                "address": "4567 Sepulveda Blvd, Culver City, CA",
+                "rating": 4.8,
+                "distance": "1.1 miles", 
+                "speciality": "Matcha bubble tea",
+                "atmosphere": "Zen garden, peaceful setting",
+                "price_range": "$",
+                "phone": "(424) 555-0398"
+            }
+        ]
+    elif "manhattan" in location:
+        mock_cafes = [
+            {
+                "name": "Midtown Matcha",
+                "address": "456 5th Ave, New York, NY",
+                "rating": 4.6,
+                "distance": "0.2 miles",
+                "speciality": "Premium Japanese matcha",
+                "atmosphere": "Fast-paced, modern, business district",
+                "price_range": "$$$",
+                "phone": "(212) 555-0234"
+            },
+            {
+                "name": "SoHo Green Tea",
+                "address": "789 Broadway, New York, NY", 
+                "rating": 4.4,
+                "distance": "0.6 miles",
+                "speciality": "Artisanal matcha cocktails",
+                "atmosphere": "Trendy, artistic, gallery district",
+                "price_range": "$$$$",
+                "phone": "(212) 555-0345"
+            },
+            {
+                "name": "Central Park Matcha",
+                "address": "321 Central Park West, New York, NY",
+                "rating": 4.9,
+                "distance": "0.9 miles", 
+                "speciality": "Traditional tea ceremony",
+                "atmosphere": "Serene, park views, traditional",
+                "price_range": "$$$",
+                "phone": "(212) 555-0456"
+            }
+        ]
+    elif "queens" in location:
+        mock_cafes = [
+            {
+                "name": "Astoria Matcha Corner",
+                "address": "123 30th Ave, Astoria, NY",
+                "rating": 4.5,
+                "distance": "0.3 miles",
+                "speciality": "Greek-inspired matcha desserts",
+                "atmosphere": "Community feel, multicultural",
+                "price_range": "$$",
+                "phone": "(718) 555-0567"
+            },
+            {
+                "name": "Flushing Tea Garden",
+                "address": "456 Northern Blvd, Flushing, NY", 
+                "rating": 4.7,
+                "distance": "0.7 miles",
+                "speciality": "Authentic Asian matcha",
+                "atmosphere": "Traditional, family-owned",
+                "price_range": "$",
+                "phone": "(718) 555-0678"
+            },
+            {
+                "name": "Long Island City Brew",
+                "address": "789 Queens Plaza, LIC, NY",
+                "rating": 4.3,
+                "distance": "1.0 miles", 
+                "speciality": "Matcha cold brew",
+                "atmosphere": "Industrial chic, waterfront views",
+                "price_range": "$$",
+                "phone": "(718) 555-0789"
+            }
+        ]
+    else:
+        # Default Brooklyn cafés for any other location
+        mock_cafes = [
+            {
+                "name": "Matcha Zen Brooklyn",
+                "address": "245 Court St, Brooklyn, NY",
+                "rating": 4.8,
+                "distance": "0.3 miles",
+                "speciality": "Traditional ceremonial matcha",
+                "atmosphere": "Quiet, minimalist, perfect for reflection",
+                "price_range": "$$",
+                "phone": "(718) 555-0123"
+            },
+            {
+                "name": "Green Tea House",
+                "address": "156 Atlantic Ave, Brooklyn, NY", 
+                "rating": 4.6,
+                "distance": "0.7 miles",
+                "speciality": "Artisanal matcha lattes",
+                "atmosphere": "Cozy corner nooks, ambient lighting",
+                "price_range": "$$$",
+                "phone": "(718) 555-0456"
+            },
+            {
+                "name": "Whiski's Favorite",
+                "address": "89 Smith St, Brooklyn, NY",
+                "rating": 4.9,
+                "distance": "1.2 miles", 
+                "speciality": "Creative matcha cocktails",
+                "atmosphere": "Vibrant, artistic, Instagram-worthy",
+                "price_range": "$$",
+                "phone": "(718) 555-0789"
+            }
+        ]
     
     # Display café cards (removed images)
     for i, cafe in enumerate(mock_cafes):
@@ -521,7 +675,7 @@ def show_cafe_results_scene():
     col1, col2, col3 = st.columns([1, 1, 1])
     
     with col1:
-        if st.button("← Back to Results", key="back_to_results", use_container_width=True):
+        if st.button("← Back", key="back_to_results", use_container_width=True):
             st.session_state.page = 'results'
             st.rerun()
     
@@ -533,7 +687,7 @@ def show_cafe_results_scene():
             st.rerun()
     
     with col3:
-        if st.button("💬 Chat with Whiski", key="chat_from_cafes", use_container_width=True):
+        if st.button("💬 Chat", key="chat_from_cafes", use_container_width=True):
             st.session_state.page = 'chat'  # Navigate to chat page
             st.rerun()
 
