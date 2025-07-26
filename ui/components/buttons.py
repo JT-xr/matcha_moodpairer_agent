@@ -42,12 +42,18 @@ def render_location_button_list(locations, target_scene, custom_scene=None, sess
         with col2:
             if st.button(f"📍 {location}", key=f"loc_{i}", use_container_width=True):
                 if location == "Other Location" and custom_scene:
+                    # Set transitioning flag to prevent dual rendering
+                    st.session_state.transitioning = True
                     navigate_to_scene(custom_scene)
                 else:
+                    # Set transitioning flag to prevent dual rendering
+                    st.session_state.transitioning = True
                     st.session_state[session_key] = location
                     # Also set legacy key for compatibility
                     st.session_state.selected_location = location
                     navigate_to_scene(target_scene)
+                # Immediately stop further rendering
+                st.stop()
 
 def render_action_button(label, action, button_type="secondary", key_suffix="", full_width=False):
     """

@@ -14,51 +14,55 @@ from ..utils import SCENES, navigate_to_scene
 
 def render_loading_scene():
     """Render the loading/processing scene"""
-    # Force a clean UI state
-    if 'loading_started' not in st.session_state:
-        st.session_state.loading_started = True
-        st.rerun()
+    # Clear any transitioning flags
+    if 'transitioning' in st.session_state:
+        del st.session_state.transitioning
     
     # Render the green step progress bar (Step 3 of 4)
     render_progress_bar(3)
     
-    # Use a container to ensure full control over the display
-    with st.container():
-        st.markdown("""
-        <style>
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #557937ff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        </style>
-        
-        <div style="text-align: center; padding: 50px 20px; min-height: 60vh; display: flex; flex-direction: column; justify-content: center;">
-            <h2 style="font-size: 48px; margin-bottom: 30px; color: #557937ff;">🧠 Whiski is thinking...</h2>
-            <p style="font-size: 20px; color: #666; margin-bottom: 40px;">
-                Brewing the perfect matcha recommendation for you
-            </p>
-            <div class="loading-spinner"></div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Wait for a few seconds to simulate processing
-        time.sleep(3)
-        
-        # Clear the loading flag
-        if 'loading_started' in st.session_state:
-            del st.session_state.loading_started
-        
-        # Navigate to results
-        navigate_to_scene(SCENES['RESULTS'])
-        st.rerun()
-    st.rerun()
+    # Add targeted CSS to hide specific remnant elements
+    st.markdown("""
+    <style>
+    /* Hide specific UI elements from previous scenes */
+    .stButton:not([data-testid*="progress"]) {
+        display: none !important;
+    }
+    
+    /* Hide any text inputs or form elements */
+    [data-testid="stTextInput"], 
+    [data-testid="stSelectbox"],
+    .stRadio {
+        display: none !important;
+    }
+    
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #557937ff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    </style>
+    
+    <div style="text-align: center; padding: 50px 20px; min-height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+        <h2 style="font-size: 48px; margin-bottom: 30px; color: #557937ff;">🧠 Whiski is thinking...</h2>
+        <p style="font-size: 20px; color: #666; margin-bottom: 40px;">
+            Brewing the perfect matcha recommendation for you
+        </p>
+        <div class="loading-spinner"></div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Wait for processing
+    time.sleep(3)
+    
+    # Navigate to results
+    navigate_to_scene(SCENES['RESULTS'])

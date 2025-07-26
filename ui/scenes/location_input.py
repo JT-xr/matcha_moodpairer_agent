@@ -15,6 +15,10 @@ from ..utils import SCENES, navigate_to_scene
 
 def render_location_input_scene():
     """Render the location input scene"""
+    # Don't render if we're transitioning to another scene
+    if st.session_state.get('transitioning', False):
+        return
+        
     render_progress_bar(2)
     
     # Scene header
@@ -42,6 +46,10 @@ def render_location_input_scene():
 
 def render_custom_location_scene():
     """Render the custom location input scene"""
+    # Don't render if we're transitioning to another scene
+    if st.session_state.get('transitioning', False):
+        return
+        
     render_progress_bar(2)
     
     # Scene header with current mood context
