@@ -46,7 +46,7 @@ def render_cafe_card(cafe_data, card_index=0):
             <span style="color: #4CAF50;">⭐ {cafe_data['rating']}</span>
         </h4>
         <p style="color: #666; margin: 5px 0; font-size: 14px;">
-            📍 {cafe_data['address']}{' • <strong>' + cafe_data['distance'] + '</strong>' if cafe_data['distance'] else ''}
+            📍 {cafe_data['address']} • <strong>{cafe_data['distance']}</strong>
         </p>
         <p style="color: #4CAF50; margin: 5px 0; font-weight: bold; font-size: 15px;">
             🍵 {cafe_data['speciality']}

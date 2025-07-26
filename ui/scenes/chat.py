@@ -14,7 +14,7 @@ from ..utils import SCENES, navigate_to_scene
 
 # Import real backend modules
 try:
-    from whiski_agent import WhiskiAgent
+    from whiski_agent import agent  # Import the agent instance directly like in original
     AGENT_AVAILABLE = True
 except ImportError:
     AGENT_AVAILABLE = False
@@ -22,7 +22,7 @@ except ImportError:
 
 def get_ai_response(prompt, context=None):
     """
-    Get AI response using real Whiski agent
+    Get AI response using real Whiski agent (same as original backup)
     
     Args:
         prompt (str): User's message
@@ -35,23 +35,8 @@ def get_ai_response(prompt, context=None):
         return get_fallback_response(prompt)
     
     try:
-        agent = WhiskiAgent()
-        
-        # Add context to prompt if available
-        if context:
-            contextual_prompt = f"""
-            Context: User is feeling {context.get('mood', 'unknown')} and is in {context.get('location', 'unknown location')}.
-            {f"Recommended drink: {context.get('drink_recommendation', '')}" if context.get('drink_recommendation') else ""}
-            {f"Weather: {context.get('weather_data', '')}" if context.get('weather_data') else ""}
-            
-            User message: {prompt}
-            
-            Respond as Whiski, the friendly matcha expert AI assistant.
-            """
-        else:
-            contextual_prompt = f"User message: {prompt}\n\nRespond as Whiski, the friendly matcha expert AI assistant."
-        
-        response = agent.run(contextual_prompt)
+        # Use agent directly like in the original backup
+        response = agent.run(prompt)
         return response
         
     except Exception as e:
@@ -90,29 +75,9 @@ def get_fallback_response(prompt):
         ]
         return random.choice(responses)
 
-def initialize_chat_history():
-    """Initialize chat history with welcome message"""
-    if 'chat_history' not in st.session_state:
-        # Get current context
-        mood = st.session_state.get('selected_mood')
-        location = st.session_state.get('user_location')
-        
-        welcome_message = "Hi! I'm Whiski 🍵 I'm here to help you with all things matcha!"
-        
-        if mood and location:
-            welcome_message += f" Since you selected {mood} mood in {location}, feel free to ask me about your recommendation or anything else!"
-        else:
-            welcome_message += " What would you like to know about matcha?"
-        
-        st.session_state.chat_history = [
-            {
-                "role": "assistant", 
-                "content": welcome_message
-            }
-        ]
 
 def render_chat_scene():
-    """Render the chat interface scene matching the mockup design"""
+    """Render the chat interface scene matching the original backup implementation"""
     render_progress_bar(4, total_steps=4)
     
     # Clean, centered header design matching mockup
@@ -123,14 +88,12 @@ def render_chat_scene():
     </div>
     """, unsafe_allow_html=True)
     
-    # Initialize chat history
-    initialize_chat_history()
-    
-    # Center the bot image like in the mockup
+    # Center the bot image like in the mockup and original backup
+    # Use the same sizing as the original backup (120px width)
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         try:
-            st.image("bot.png", width=700)
+            st.image("bot.png", width=700, output_format="PNG")
         except:
             # Fallback if bot.png not found
             st.markdown("""
@@ -143,45 +106,17 @@ def render_chat_scene():
     # Add some spacing
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Chat input at the bottom (matching mockup style)
-    if prompt := st.chat_input("Type Here!"):
-        # Add user message to history
-        st.session_state.chat_history.append({"role": "user", "content": prompt})
-        
-        # Get context for AI
-        context = {
-            'mood': st.session_state.get('selected_mood'),
-            'location': st.session_state.get('user_location'),
-            'drink_recommendation': st.session_state.get('drink_recommendation'),
-            'weather_data': st.session_state.get('weather_data')
-        }
+    # Chat input at the bottom (matching original backup style)
+    if prompt := st.chat_input("Ask me about Matcha!"):
+        # Display user message using Streamlit's chat components (like original)
+        st.chat_message("user").write(prompt)
         
         # Get AI response
         with st.spinner("Whiski is thinking..."):
-            response = get_ai_response(prompt, context)
+            response = get_ai_response(prompt)
         
-        # Add assistant response to history
-        st.session_state.chat_history.append({"role": "assistant", "content": response})
-        st.rerun()
-    
-    # Display chat history in a clean format (only if there are messages beyond welcome)
-    if len(st.session_state.chat_history) > 1:
-        st.markdown("---")
-        st.markdown("**Chat History:**")
-        
-        for message in st.session_state.chat_history[1:]:  # Skip the welcome message
-            if message["role"] == "user":
-                st.markdown(f"""
-                <div style="background: #f0f2f6; padding: 10px; border-radius: 10px; margin: 10px 0; text-align: right;">
-                    <strong>You:</strong> {message["content"]}
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div style="background: #e8f5e8; padding: 10px; border-radius: 10px; margin: 10px 0;">
-                    <strong>🤖 Whiski:</strong> {message["content"]}
-                </div>
-                """, unsafe_allow_html=True)
+        # Display assistant response using Streamlit's chat components (like original)  
+        st.chat_message("assistant").markdown(f'<span style="color: black;">**Whiski 🧠:**</span> {response}', unsafe_allow_html=True)
     
     # Navigation buttons matching mockup style (3 buttons in a row)
     st.markdown("<br><br>", unsafe_allow_html=True)

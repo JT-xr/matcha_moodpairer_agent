@@ -172,7 +172,7 @@ def render_results_scene():
     # Scene header
     st.markdown("""
     <div style="text-align: center; padding: 30px;">
-        <h1 style="color: #557937ff; font-size: 60px; margin-bottom: 20px;">🎉 Perfect Match!</h1>
+        <h1 style="color: #557937ff; font-size: 60px; margin-bottom: 20px;">🎉 Perfect Match(a)!</h1>
         <p style="font-size: 20px; color: #666;">Here's your personalized matcha experience</p>
     </div>
     """, unsafe_allow_html=True)

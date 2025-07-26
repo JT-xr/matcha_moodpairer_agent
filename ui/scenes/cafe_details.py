@@ -15,11 +15,11 @@ from ..utils import SCENES, navigate_to_scene
 
 # Import real backend modules
 try:
-    from cafe_search import search_cafes_near_location, get_cafe_details
+    from cafe_search import search_matcha_cafes
     CAFE_SEARCH_AVAILABLE = True
 except ImportError:
     CAFE_SEARCH_AVAILABLE = False
-    st.warning("Café search module not available - using fallback mode")
+    # Warning will be shown in the scene function if needed
 
 def get_real_cafe_results(location, mood=None):
     """
@@ -37,26 +37,43 @@ def get_real_cafe_results(location, mood=None):
     
     try:
         # Use real café search
-        cafes = search_cafes_near_location(location, mood_filter=mood)
+        cafes = search_matcha_cafes(location)
         
         if not cafes:
             return get_fallback_cafes(location)
         
-        # Format results for display
+        # Limit to 5 results and format for display
+        limited_cafes = cafes[:5]
         formatted_cafes = []
-        for cafe in cafes:
-            # Get additional details if available
-            details = get_cafe_details(cafe.get('id', '')) if hasattr(cafe, 'get') else {}
-            
+        
+        # Varied speciality descriptions
+        specialities = [
+            "Premium matcha lattes & ceremonial grade tea",
+            "Artisanal matcha drinks & Japanese sweets", 
+            "Traditional matcha ceremonies & modern beverages",
+            "Organic matcha & plant-based milk options",
+            "Signature matcha blends & seasonal specialties"
+        ]
+        
+        # Varied atmosphere descriptions
+        atmospheres = [
+            "Zen-inspired space perfect for mindful sipping",
+            "Modern café with traditional Japanese touches",
+            "Cozy corner spot ideal for creative work", 
+            "Bright, minimalist space with calming vibes",
+            "Warm gathering place for matcha enthusiasts"
+        ]
+        
+        for i, cafe in enumerate(limited_cafes):
             formatted_cafe = {
                 'name': cafe.get('name', 'Unknown Café'),
                 'address': cafe.get('address', 'Address not available'),
-                'rating': cafe.get('rating', 0.0),
-                'distance': cafe.get('distance', 'Unknown distance'),
-                'speciality': details.get('speciality', 'Matcha drinks'),
-                'atmosphere': details.get('atmosphere', 'Cozy café atmosphere'),
-                'price_range': cafe.get('price_range', '$$'),
-                'phone': cafe.get('phone', 'Phone not available')
+                'rating': cafe.get('rating', 4.0),
+                'distance': '',  # Remove distance text
+                'speciality': specialities[i % len(specialities)],
+                'atmosphere': atmospheres[i % len(atmospheres)],
+                'price_range': '$3-8',  # Default price range
+                'phone': cafe.get('phone') or 'Phone not available'
             }
             formatted_cafes.append(formatted_cafe)
         
@@ -67,132 +84,170 @@ def get_real_cafe_results(location, mood=None):
         return get_fallback_cafes(location)
 
 def get_fallback_cafes(location):
-    """Fallback café data when backend is unavailable"""
+    """Fallback café data when backend is unavailable - limited to 5 results"""
     location_lower = location.lower() if location else "brooklyn, ny"
     
+    # Varied speciality descriptions
+    specialities = [
+        "Premium matcha lattes & ceremonial grade tea",
+        "Artisanal matcha drinks & Japanese sweets", 
+        "Traditional matcha ceremonies & modern beverages",
+        "Organic matcha & plant-based milk options",
+        "Signature matcha blends & seasonal specialties"
+    ]
+    
+    # Varied atmosphere descriptions
+    atmospheres = [
+        "Zen-inspired space perfect for mindful sipping",
+        "Modern café with traditional Japanese touches",
+        "Cozy corner spot ideal for creative work", 
+        "Bright, minimalist space with calming vibes",
+        "Warm gathering place for matcha enthusiasts"
+    ]
+    
     if "culver city" in location_lower or "california" in location_lower:
-        return [
+        cafes = [
             {
                 "name": "Matcha & Co Culver City",
                 "address": "9600 Culver Blvd, Culver City, CA",
                 "rating": 4.7,
-                "distance": "0.4 miles",
-                "speciality": "Organic ceremonial matcha",
-                "atmosphere": "Modern, bright, California casual",
-                "price_range": "$$$",
                 "phone": "(424) 555-0156"
             },
             {
                 "name": "Venice Beach Matcha House",
                 "address": "1234 Washington Blvd, Culver City, CA", 
                 "rating": 4.5,
-                "distance": "0.8 miles",
-                "speciality": "Coconut matcha lattes",
-                "atmosphere": "Beachy vibes, outdoor seating",
-                "price_range": "$$",
                 "phone": "(424) 555-0287"
             },
             {
                 "name": "Green Garden Tea",
                 "address": "4567 Sepulveda Blvd, Culver City, CA",
                 "rating": 4.8,
-                "distance": "1.1 miles", 
-                "speciality": "Matcha bubble tea",
-                "atmosphere": "Zen garden, peaceful setting",
-                "price_range": "$",
                 "phone": "(424) 555-0398"
+            },
+            {
+                "name": "Westside Matcha Co",
+                "address": "7890 West Blvd, Culver City, CA",
+                "rating": 4.6,
+                "phone": "(424) 555-0409"
+            },
+            {
+                "name": "Pacific Matcha Studio",
+                "address": "1111 Jefferson Blvd, Culver City, CA",
+                "rating": 4.4,
+                "phone": "(424) 555-0510"
             }
         ]
-    elif "manhattan" in location_lower:
-        return [
+    elif "manhattan" in location_lower or "new york" in location_lower:
+        cafes = [
             {
-                "name": "Midtown Matcha",
-                "address": "456 5th Ave, New York, NY",
-                "rating": 4.6,
-                "distance": "0.2 miles",
-                "speciality": "Premium Japanese matcha",
-                "atmosphere": "Fast-paced, modern, business district",
-                "price_range": "$$$",
+                "name": "Soho Matcha House",
+                "address": "456 Broadway, New York, NY",
+                "rating": 4.8,
                 "phone": "(212) 555-0234"
             },
             {
-                "name": "SoHo Green Tea",
-                "address": "789 Broadway, New York, NY", 
-                "rating": 4.4,
-                "distance": "0.6 miles",
-                "speciality": "Artisanal matcha cocktails",
-                "atmosphere": "Trendy, artistic, gallery district",
-                "price_range": "$$$$",
+                "name": "West Village Tea Co",
+                "address": "123 Bleecker St, New York, NY", 
+                "rating": 4.6,
                 "phone": "(212) 555-0345"
             },
             {
                 "name": "Central Park Matcha",
                 "address": "321 Central Park West, New York, NY",
                 "rating": 4.9,
-                "distance": "0.9 miles", 
-                "speciality": "Traditional tea ceremony",
-                "atmosphere": "Serene, park views, traditional",
-                "price_range": "$$$",
                 "phone": "(212) 555-0456"
+            },
+            {
+                "name": "East Village Zen Tea",
+                "address": "789 St Marks Pl, New York, NY",
+                "rating": 4.5,
+                "phone": "(212) 555-0567"
+            },
+            {
+                "name": "Chelsea Market Matcha",
+                "address": "75 9th Ave, New York, NY",
+                "rating": 4.7,
+                "phone": "(212) 555-0678"
             }
         ]
     elif "queens" in location_lower:
-        return [
+        cafes = [
             {
                 "name": "Astoria Matcha Corner",
                 "address": "123 30th Ave, Astoria, NY",
                 "rating": 4.5,
-                "distance": "0.3 miles",
-                "speciality": "Greek-inspired matcha desserts",
-                "atmosphere": "Community feel, multicultural",
-                "price_range": "$$",
                 "phone": "(718) 555-0567"
             },
             {
                 "name": "Flushing Tea Garden",
                 "address": "456 Northern Blvd, Flushing, NY", 
                 "rating": 4.7,
-                "distance": "0.7 miles",
-                "speciality": "Authentic Asian matcha",
-                "atmosphere": "Traditional, family-owned",
-                "price_range": "$",
                 "phone": "(718) 555-0678"
             },
             {
                 "name": "Long Island City Brew",
                 "address": "789 Queens Plaza, LIC, NY",
-                "rating": 4.3,
-                "distance": "1.0 miles", 
-                "speciality": "Matcha cold brew",
-                "atmosphere": "Industrial chic, waterfront views",
-                "price_range": "$$",
+                "rating": 4.4,
                 "phone": "(718) 555-0789"
+            },
+            {
+                "name": "Forest Hills Matcha",
+                "address": "321 Austin St, Forest Hills, NY",
+                "rating": 4.6,
+                "phone": "(718) 555-0890"
+            },
+            {
+                "name": "Jackson Heights Tea",
+                "address": "654 Roosevelt Ave, Jackson Heights, NY",
+                "rating": 4.3,
+                "phone": "(718) 555-0901"
             }
         ]
-    else:
-        # Default Brooklyn cafés for any other location
-        return [
+    else:  # Default to Brooklyn
+        cafes = [
             {
-                "name": "Matcha Zen Brooklyn",
-                "address": "245 Court St, Brooklyn, NY",
-                "rating": 4.8,
-                "distance": "0.3 miles",
-                "speciality": "Traditional ceremonial matcha",
-                "atmosphere": "Quiet, minimalist, perfect for reflection",
-                "price_range": "$$",
+                "name": "Park Slope Matcha",
+                "address": "789 7th Ave, Brooklyn, NY",
+                "rating": 4.6,
                 "phone": "(718) 555-0123"
             },
             {
-                "name": "Green Tea House",
-                "address": "156 Atlantic Ave, Brooklyn, NY", 
-                "rating": 4.6,
-                "distance": "0.7 miles",
-                "speciality": "Artisanal matcha lattes",
-                "atmosphere": "Cozy corner nooks, ambient lighting",
-                "price_range": "$$$",
+                "name": "Williamsburg Green Tea",
+                "address": "234 Bedford Ave, Brooklyn, NY",
+                "rating": 4.8,
+                "phone": "(718) 555-0234"
+            },
+            {
+                "name": "DUMBO Matcha House",
+                "address": "567 Water St, Brooklyn, NY",
+                "rating": 4.7,
+                "phone": "(718) 555-0345"
+            },
+            {
+                "name": "Red Hook Tea Co",
+                "address": "890 Van Brunt St, Brooklyn, NY",
+                "rating": 4.5,
                 "phone": "(718) 555-0456"
+            },
+            {
+                "name": "Crown Heights Zen",
+                "address": "432 Franklin Ave, Brooklyn, NY",
+                "rating": 4.4,
+                "phone": "(718) 555-0567"
             }
         ]
+    
+    # Add varied descriptions and remove distance
+    for i, cafe in enumerate(cafes):
+        cafe.update({
+            'distance': '',  # Remove distance text
+            'speciality': specialities[i % len(specialities)],
+            'atmosphere': atmospheres[i % len(atmospheres)],
+            'price_range': '$3-8'
+        })
+    
+    return cafes
 
 def render_cafe_details_scene():
     """Render the café search results scene"""
@@ -208,6 +263,10 @@ def render_cafe_details_scene():
         f"Perfect spots for your <strong>{mood}</strong> vibe in <strong>{location}</strong>",
         font_size="42px"
     ), unsafe_allow_html=True)
+    
+    # Show warning only if backend is not available
+    if not CAFE_SEARCH_AVAILABLE:
+        st.info("🔄 Using sample café data - real search temporarily unavailable")
     
     # Force regenerate café results if empty or not present
     if 'cafe_results' not in st.session_state or not st.session_state.cafe_results:
@@ -239,6 +298,26 @@ def render_cafe_details_scene():
                 "atmosphere": "Cozy corner nooks, ambient lighting",
                 "price_range": "$$$",
                 "phone": "(718) 555-0456"
+            },
+            {
+                "name": "Brooklyn Matcha Co",
+                "address": "89 Smith St, Brooklyn, NY",
+                "rating": 4.7,
+                "distance": "1.0 miles",
+                "speciality": "Creative matcha cocktails",
+                "atmosphere": "Vibrant, artistic, Instagram-worthy",
+                "price_range": "$$",
+                "phone": "(718) 555-0789"
+            },
+            {
+                "name": "Tea & Tranquility",
+                "address": "312 Flatbush Ave, Brooklyn, NY",
+                "rating": 4.5,
+                "distance": "1.2 miles",
+                "speciality": "Matcha bubble tea",
+                "atmosphere": "Modern, spacious, perfect for groups",
+                "price_range": "$",
+                "phone": "(718) 555-0234"
             }
         ]
         st.session_state.cafe_results = cafes
