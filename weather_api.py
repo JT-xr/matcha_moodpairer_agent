@@ -15,5 +15,3 @@ def get_nyc_weather():
         return f"{temp}°C"
     except Exception:
         return "Weather unavailable"
-
-st.markdown(f"**🌤️ Weather:** {get_nyc_weather()}")

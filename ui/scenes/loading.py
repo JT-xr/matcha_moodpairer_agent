@@ -19,39 +19,40 @@ def render_loading_scene():
         st.session_state.loading_started = True
         st.rerun()
     
+    # Render the green step progress bar (Step 3 of 4)
     render_progress_bar(3)
     
     # Use a container to ensure full control over the display
     with st.container():
         st.markdown("""
+        <style>
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #557937ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        </style>
+        
         <div style="text-align: center; padding: 50px 20px; min-height: 60vh; display: flex; flex-direction: column; justify-content: center;">
             <h2 style="font-size: 48px; margin-bottom: 30px; color: #557937ff;">🧠 Whiski is thinking...</h2>
             <p style="font-size: 20px; color: #666; margin-bottom: 40px;">
                 Brewing the perfect matcha recommendation for you
             </p>
+            <div class="loading-spinner"></div>
         </div>
         """, unsafe_allow_html=True)
         
-        # Loading animation
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        
-        messages = [
-            "Analyzing your mood...",
-            "Checking local weather...",
-            "Finding nearby cafés...",
-            "Crafting your perfect recommendation..."
-        ]
-        
-        # Animate through the loading messages
-        for i, message in enumerate(messages):
-            status_text.text(message)
-            progress_bar.progress((i + 1) * 25)
-            time.sleep(0.8)
-        
-        # Clear the loading elements
-        progress_bar.empty()
-        status_text.empty()
+        # Wait for a few seconds to simulate processing
+        time.sleep(3)
         
         # Clear the loading flag
         if 'loading_started' in st.session_state:
