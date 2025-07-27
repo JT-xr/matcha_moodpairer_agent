@@ -20,7 +20,7 @@ def render_recommendation_card(drink, vibe, title="🧠 Whiski's Choice"):
     """
     st.markdown(f"""
     <div style="{get_recommendation_card_style()}">
-        <h3 style="color: #2c3e50; margin-top: 0;">{title}</h3>
+        <h3 style="color: #2c3e50; margin-top: 0; text-align: center;">{title}</h3>
         <div style="background: #e8f5e8; padding: 10px; border-radius: 8px; margin: 10px 0;">
             <strong>🍵 Drink:</strong> {drink}
         </div>

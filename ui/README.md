@@ -47,6 +47,4 @@ BACKEND INTEGRATIONS:
 - whiski_agent.py: AI recommendations and chat
 - cafe_search.py: Café discovery and details
 - weather_api.py: Weather-based recommendations
-- location_cards.py: Location-based UI components
-- splashpage.py: Welcome page logic
 """
