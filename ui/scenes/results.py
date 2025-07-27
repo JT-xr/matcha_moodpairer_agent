@@ -212,7 +212,6 @@ def render_results_scene():
         {
             'label': '📍 Find Cafés',
             'action': lambda: navigate_to_scene(SCENES['CAFE_DETAILS']),
-            'type': 'primary',
             'key': 'find_cafes'
         },
         {

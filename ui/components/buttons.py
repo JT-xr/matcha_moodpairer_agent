@@ -37,9 +37,11 @@ def render_location_button_list(locations, target_scene, custom_scene=None, sess
         custom_scene (str): Optional scene for "Other Location" option
         session_key (str): Session state key to store selected location
     """
+    # Create horizontal layout like mood buttons to eliminate vertical spacing
+    cols = st.columns(len(locations), gap="small")
+    
     for i, location in enumerate(locations):
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
+        with cols[i]:
             if st.button(f"📍 {location}", key=f"loc_{i}", use_container_width=True):
                 if location == "Other Location" and custom_scene:
                     # Set transitioning flag to prevent dual rendering
