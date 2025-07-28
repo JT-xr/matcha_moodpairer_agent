@@ -87,4 +87,3 @@ if __name__ == "__main__":
     print("Test 1: Simple greeting")
     resp1 = agent.run("code?")
     print(f"Response: {resp1}\n")
-    
