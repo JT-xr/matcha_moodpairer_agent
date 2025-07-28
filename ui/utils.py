@@ -10,6 +10,7 @@ SCENES = {
     'WELCOME': 'welcome',
     'MOOD_SELECTION': 'mood_selection',
     'LOCATION_INPUT': 'location_input',
+    'CUSTOM_LOCATION': 'custom_location',
     'LOADING': 'loading',
     'RESULTS': 'results',
     'CAFE_DETAILS': 'cafe_details',
@@ -56,6 +57,9 @@ def navigate_to_scene(scene_name):
     """Navigate to a specific scene"""
     if scene_name in SCENES.values():
         st.session_state.current_scene = scene_name
+        # Clear transitioning flag to allow proper rendering
+        if 'transitioning' in st.session_state:
+            del st.session_state.transitioning
         st.rerun()
 
 def get_current_scene():

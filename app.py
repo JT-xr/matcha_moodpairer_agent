@@ -1,12 +1,3 @@
-"""
-Main Whiski App - Integrated with Modular UI System
-===================================================
-This file integrates the modular UI components from the ui/ directory
-with the existing backend functionality from the original app.py.
-
-Migration from prototype_multipage.py completed with real backend integration.
-"""
-
 import os
 import streamlit as st
 from dotenv import load_dotenv
@@ -54,7 +45,7 @@ def main():
         render_mood_selection_scene()
     elif current_scene == SCENES['LOCATION_INPUT']:
         render_location_input_scene()
-    elif current_scene == 'custom_location':  # Special case for custom location
+    elif current_scene == SCENES['CUSTOM_LOCATION']:
         render_custom_location_scene()
     elif current_scene == SCENES['LOADING']:
         render_loading_scene()

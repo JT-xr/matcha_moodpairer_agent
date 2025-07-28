@@ -72,7 +72,7 @@ def get_real_cafe_results(location, mood=None):
                 'distance': '',  # Remove distance text
                 'speciality': specialities[i % len(specialities)],
                 'atmosphere': atmospheres[i % len(atmospheres)],
-                'price_range': '$3-8',  # Default price range
+                'price_range': '$$',  # Use dollar signs instead of $3-8
                 'phone': cafe.get('phone') or 'Phone not available'
             }
             formatted_cafes.append(formatted_cafe)
@@ -244,7 +244,7 @@ def get_fallback_cafes(location):
             'distance': '',  # Remove distance text
             'speciality': specialities[i % len(specialities)],
             'atmosphere': atmospheres[i % len(atmospheres)],
-            'price_range': '$3-8'
+            'price_range': '$$'  # Use dollar signs instead of $3-8
         })
     
     return cafes
