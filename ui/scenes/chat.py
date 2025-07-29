@@ -22,7 +22,7 @@ except ImportError:
 
 def get_ai_response(prompt, context=None):
     """
-    Get AI response using real Whiski agent (same as original backup)
+    Get AI response using real Whiski agent
     
     Args:
         prompt (str): User's message
@@ -32,48 +32,17 @@ def get_ai_response(prompt, context=None):
         str: AI response
     """
     if not AGENT_AVAILABLE:
-        return get_fallback_response(prompt)
+        st.error("Whiski agent is not available. Please check your configuration.")
+        return "Sorry, I'm not available right now. Please try again later."
     
     try:
-        # Use agent directly like in the original backup
+        # Use agent directly
         response = agent.run(prompt)
         return response
         
     except Exception as e:
         st.error(f"Error getting AI response: {e}")
-        return get_fallback_response(prompt)
-
-def get_fallback_response(prompt):
-    """Fallback responses when agent is unavailable"""
-    import random
-    
-    # Simple keyword-based responses
-    prompt_lower = prompt.lower()
-    
-    if any(word in prompt_lower for word in ['hello', 'hi', 'hey']):
-        return "Hi there! I'm Whiski 🍵 I'm here to help you with all things matcha! What would you like to know?"
-    
-    elif any(word in prompt_lower for word in ['recommend', 'suggestion', 'advice']):
-        return "Based on your preferences, I'd suggest trying different matcha preparations to find what suits your mood best! Would you like specific recommendations?"
-    
-    elif any(word in prompt_lower for word in ['café', 'cafe', 'location', 'where']):
-        return "I can help you find great matcha cafés! The ones I found for you should have the perfect atmosphere for your current vibe. Have you checked them out?"
-    
-    elif any(word in prompt_lower for word in ['weather', 'temperature', 'hot', 'cold']):
-        return "Weather definitely affects the perfect matcha choice! Hot drinks for cozy weather, iced options for warm days. What's the weather like where you are?"
-    
-    elif any(word in prompt_lower for word in ['matcha', 'tea', 'green']):
-        return "Matcha is amazing! It's rich in antioxidants, provides sustained energy, and has this wonderful earthy flavor. Each preparation brings out different aspects of the tea. What aspect interests you most?"
-    
-    else:
-        responses = [
-            "That's a great question about matcha! Let me share some insights...",
-            "Interesting! Matcha culture has so many fascinating aspects to explore.",
-            "I love talking about this! Based on your current preferences...",
-            "Great point! Here's what I think about that...",
-            "That's something many matcha enthusiasts wonder about!"
-        ]
-        return random.choice(responses)
+        return "I'm having trouble responding right now. Please try again."
 
 
 def render_chat_scene():

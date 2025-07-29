@@ -37,77 +37,46 @@ def get_ai_recommendation(mood, location, weather_data=None):
         dict: Recommendation with 'drink' and 'vibe' keys
     """
     
-    # Try to get AI-generated recommendation using template
-    if BACKEND_AVAILABLE:
-        try:
-            # Get weather context
-            weather_context = get_nyc_weather() if weather_data is None else weather_data
+    if not BACKEND_AVAILABLE:
+        st.error("Whiski agent is not available. Please check your configuration.")
+        return {"drink": "Agent unavailable", "vibe": "Please try again later"}
+    
+    try:
+        # Get weather context
+        weather_context = get_nyc_weather() if weather_data is None else weather_data
+        
+        # Load and fill the prompt template
+        import os
+        template_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "templates", "prompt_template_gemini.txt")
+        with open(template_path, "r") as tf:
+            template = tf.read()
             
-            # Load and fill the prompt template
-            import os
-            template_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "templates", "prompt_template_gemini.txt")
-            with open(template_path, "r") as tf:
-                template = tf.read()
-                
-            # Fill template with actual values
-            filled_task = template.format(
-                mood=mood,
-                location=location,
-                weather=weather_context
-            )
-            
-            # Get response from agent
-            response = agent.run(filled_task)
-            
-            # Parse the agent response to extract drink and vibe
-            import re
-            drink_match = re.search(r'Drink:\s*([^.]*\.?[^V]*?)(?=\s*Vibe:|$)', response)
-            vibe_match = re.search(r'Vibe:\s*(.*?)(?=$)', response, re.DOTALL)
-            
-            if drink_match and vibe_match:
-                ai_drink = drink_match.group(1).strip()
-                ai_vibe = vibe_match.group(1).strip()
-                return {"drink": ai_drink, "vibe": ai_vibe}
-            else:
-                # If parsing fails, use fallback
-                return get_fallback_recommendation(mood)
-            
-        except Exception as e:
-            # Use fallback if agent fails
-            return get_fallback_recommendation(mood)
-    else:
-        # Backend not available, use full fallback
-        return get_fallback_recommendation(mood)
-
-def get_fallback_recommendation(mood):
-    """Fallback recommendations when backend is unavailable"""
-    fallback_recommendations = {
-        "chill": {
-            "drink": "Iced Lavender Matcha Latte 💜 - creamy, refreshing, and calming",
-            "vibe": "Imagine yourself in a sleek, minimalist café in a quiet corner. Soft jazz plays while sunlight streams through large windows, creating the perfect peaceful atmosphere to unwind. 🌿✨"
-        },
-        "anxious": {
-            "drink": "Warm Ceremonial Matcha 🍵 - pure, grounding, and meditative",
-            "vibe": "Picture a serene tea house with bamboo accents and gentle instrumental music. The ritual of preparing matcha helps center your mind and ease your worries. 🧘‍♀️🌱"
-        },
-        "creative": {
-            "drink": "Matcha Rose Latte 🌹 - inspiring, floral, and artistic",
-            "vibe": "Envision a vibrant café filled with local art, colorful cushions, and the gentle hum of creative energy. Natural light pours in, perfect for sketching or writing. 🎨✨"
-        },
-        "reflective": {
-            "drink": "Traditional Matcha Tea 🍃 - pure, contemplative, and authentic",
-            "vibe": "Find yourself in a quiet corner of a traditional tea room, surrounded by books and soft lighting. The perfect space for deep thoughts and peaceful contemplation. 📚🕯️"
-        },
-        "energized": {
-            "drink": "Matcha Lemonade ⚡ - zesty, refreshing, and invigorating",
-            "vibe": "Picture a bright, modern café with upbeat music and bustling energy. Large communal tables and standing desks create the perfect environment for productivity. 💪🌟"
-        },
-        "cozy": {
-            "drink": "Warm Matcha with Oat Milk ☕ - comforting, rich, and nurturing",
-            "vibe": "Imagine a snug café with plush armchairs, warm lighting, and the gentle sound of rain outside. Soft blankets and the aroma of fresh pastries complete the cozy atmosphere. 🛋️🕯️"
-        }
-    }
-    return fallback_recommendations.get(mood, fallback_recommendations["chill"])
+        # Fill template with actual values
+        filled_task = template.format(
+            mood=mood,
+            location=location,
+            weather=weather_context
+        )
+        
+        # Get response from agent
+        response = agent.run(filled_task)
+        
+        # Parse the agent response to extract drink and vibe
+        import re
+        drink_match = re.search(r'Drink:\s*([^.]*\.?[^V]*?)(?=\s*Vibe:|$)', response)
+        vibe_match = re.search(r'Vibe:\s*(.*?)(?=$)', response, re.DOTALL)
+        
+        if drink_match and vibe_match:
+            ai_drink = drink_match.group(1).strip()
+            ai_vibe = vibe_match.group(1).strip()
+            return {"drink": ai_drink, "vibe": ai_vibe}
+        else:
+            st.error("Unable to parse recommendation from agent")
+            return {"drink": "Parsing error", "vibe": "Please try again"}
+        
+    except Exception as e:
+        st.error(f"Error getting AI recommendation: {e}")
+        return {"drink": "Error occurred", "vibe": "Please try again"}
 
 def show_loading_process():
     """Show loading animation while processing recommendation"""
@@ -152,19 +121,20 @@ def render_results_scene():
                 # Weather API failed - continue without weather data
                 pass
         
-        # Get AI recommendation (with fallback)
+        # Get AI recommendation
         try:
             recommendation = get_ai_recommendation(mood, location, weather_data)
             if recommendation and 'drink' in recommendation and 'vibe' in recommendation:
                 st.session_state.drink_recommendation = recommendation['drink']
                 st.session_state.vibe_description = recommendation['vibe']
             else:
-                raise Exception("Invalid recommendation format")
+                st.error("Invalid recommendation format received")
+                st.session_state.drink_recommendation = "Recommendation error"
+                st.session_state.vibe_description = "Please try again"
         except Exception as e:
-            # Force fallback
-            fallback = get_fallback_recommendation(mood)
-            st.session_state.drink_recommendation = fallback['drink'] 
-            st.session_state.vibe_description = fallback['vibe']
+            st.error(f"Error generating recommendation: {e}")
+            st.session_state.drink_recommendation = "Error occurred"
+            st.session_state.vibe_description = "Please try again"
     
     # Show progress bar
     render_progress_bar(4)
