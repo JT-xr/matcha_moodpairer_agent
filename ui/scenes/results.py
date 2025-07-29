@@ -61,18 +61,37 @@ def get_ai_recommendation(mood, location, weather_data=None):
         # Get response from agent
         response = agent.run(filled_task)
         
-        # Parse the agent response to extract drink and vibe
+        # Parse the agent response - handle both code-wrapped and direct formats
         import re
-        drink_match = re.search(r'Drink:\s*([^.]*\.?[^V]*?)(?=\s*Vibe:|$)', response)
-        vibe_match = re.search(r'Vibe:\s*(.*?)(?=$)', response, re.DOTALL)
+        
+        # First, try to extract content from code blocks if present
+        code_match = re.search(r'<code>(.*?)</code>', response, re.DOTALL)
+        if code_match:
+            # Extract the content inside code tags
+            code_content = code_match.group(1)
+            # Look for print statements
+            print_matches = re.findall(r'print\(["\']([^"\']*)["\'][^)]*\)', code_content)
+            if print_matches:
+                # Join all print statements
+                response = ' '.join(print_matches)
+        
+        # Now parse for drink and vibe from the cleaned response
+        drink_match = re.search(r'Drink:\s*([^.]*\.?[^V]*?)(?=\s*Vibe:|$)', response, re.IGNORECASE)
+        vibe_match = re.search(r'Vibe:\s*(.*?)(?=$)', response, re.DOTALL | re.IGNORECASE)
         
         if drink_match and vibe_match:
             ai_drink = drink_match.group(1).strip()
             ai_vibe = vibe_match.group(1).strip()
             return {"drink": ai_drink, "vibe": ai_vibe}
         else:
-            st.error("Unable to parse recommendation from agent")
-            return {"drink": "Parsing error", "vibe": "Please try again"}
+            # If structured parsing fails, try to extract any meaningful content
+            if "matcha" in response.lower():
+                # If response contains matcha content, use it as-is
+                return {"drink": response[:50] + "..." if len(response) > 50 else response, 
+                       "vibe": "Perfect matcha experience awaits! 🍵"}
+            else:
+                st.error(f"Unable to parse recommendation. Agent response: {response[:100]}...")
+                return {"drink": "Parsing error", "vibe": "Please try again"}
         
     except Exception as e:
         st.error(f"Error getting AI recommendation: {e}")
