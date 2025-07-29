@@ -61,37 +61,77 @@ def get_ai_recommendation(mood, location, weather_data=None):
         # Get response from agent
         response = agent.run(filled_task)
         
-        # Parse the agent response - handle both code-wrapped and direct formats
+        # Parse the agent response - handle the actual format the agent uses
         import re
         
-        # First, try to extract content from code blocks if present
-        code_match = re.search(r'<code>(.*?)</code>', response, re.DOTALL)
-        if code_match:
-            # Extract the content inside code tags
-            code_content = code_match.group(1)
-            # Look for print statements
-            print_matches = re.findall(r'print\(["\']([^"\']*)["\'][^)]*\)', code_content)
-            if print_matches:
-                # Join all print statements
-                response = ' '.join(print_matches)
+        # Check if this is a conversational response rather than a recommendation
+        conversational_patterns = [
+            r"glad i could help",
+            r"is there another",
+            r"would you like",
+            r"anything else",
+            r"other mood",
+            r"follow.?up"
+        ]
         
-        # Now parse for drink and vibe from the cleaned response
-        drink_match = re.search(r'Drink:\s*([^.]*\.?[^V]*?)(?=\s*Vibe:|$)', response, re.IGNORECASE)
-        vibe_match = re.search(r'Vibe:\s*(.*?)(?=$)', response, re.DOTALL | re.IGNORECASE)
+        is_conversational = any(re.search(pattern, response, re.IGNORECASE) for pattern in conversational_patterns)
+        
+        if is_conversational:
+            # This is a conversational response, not a recommendation
+            # Try to re-prompt with a more direct approach
+            direct_prompt = f"Recommend a specific matcha drink and café vibe for someone feeling {mood} in {location} with {weather_context} weather. Format: **The Drink:** [recommendation] **The Vibe:** [description]"
+            response = agent.run(direct_prompt)
+        
+        # Method 1: Extract drink and vibe from the structured format
+        drink_match = re.search(r'\*\*(?:The )?Drink:\*\*\s*(.*?)(?=\*\*(?:The )?Vibe:|\n\n|$)', response, re.DOTALL | re.IGNORECASE)
+        vibe_match = re.search(r'\*\*(?:The )?Vibe:\*\*\s*(.*?)(?=$)', response, re.DOTALL | re.IGNORECASE)
         
         if drink_match and vibe_match:
-            ai_drink = drink_match.group(1).strip()
-            ai_vibe = vibe_match.group(1).strip()
-            return {"drink": ai_drink, "vibe": ai_vibe}
-        else:
-            # If structured parsing fails, try to extract any meaningful content
-            if "matcha" in response.lower():
-                # If response contains matcha content, use it as-is
-                return {"drink": response[:50] + "..." if len(response) > 50 else response, 
-                       "vibe": "Perfect matcha experience awaits! 🍵"}
-            else:
-                st.error(f"Unable to parse recommendation. Agent response: {response[:100]}...")
-                return {"drink": "Parsing error", "vibe": "Please try again"}
+            drink_text = drink_match.group(1).strip()
+            vibe_text = vibe_match.group(1).strip()
+            
+            # Clean up the text (remove extra asterisks and formatting)
+            drink_clean = re.sub(r'\*\*([^*]+)\*\*', r'\1', drink_text)
+            vibe_clean = re.sub(r'\*\*([^*]+)\*\*', r'\1', vibe_text)
+            
+            # Validate that we got actual recommendations, not questions
+            if (len(drink_clean.strip()) > 10 and 
+                "matcha" in drink_clean.lower() and 
+                len(vibe_clean.strip()) > 10 and
+                not any(pattern in drink_clean.lower() for pattern in ["another", "other", "would you", "anything else"])):
+                
+                return {
+                    "drink": drink_clean.strip(),
+                    "vibe": vibe_clean.strip()
+                }
+        
+        # Method 2: Try alternative patterns (fallback)
+        drink_alt = re.search(r'drink:\s*(.*?)(?=vibe:|$)', response, re.DOTALL | re.IGNORECASE)
+        vibe_alt = re.search(r'vibe:\s*(.*?)(?=$)', response, re.DOTALL | re.IGNORECASE)
+        
+        if drink_alt and vibe_alt:
+            drink_text = drink_alt.group(1).strip()
+            vibe_text = vibe_alt.group(1).strip()
+            
+            if (len(drink_text) > 10 and "matcha" in drink_text.lower() and len(vibe_text) > 10):
+                return {
+                    "drink": drink_text,
+                    "vibe": vibe_text
+                }
+        
+        # Method 3: If response contains matcha content but no clear structure
+        if "matcha" in response.lower():
+            # Extract any matcha-related content but provide a generic structure
+            matcha_content = re.findall(r'[^.]*matcha[^.]*\.?', response, re.IGNORECASE)
+            if matcha_content:
+                return {
+                    "drink": matcha_content[0][:80] + ("..." if len(matcha_content[0]) > 80 else ""),
+                    "vibe": f"A perfect {mood} atmosphere in {location} to enjoy your matcha! 🍵"
+                }
+        
+        # If all parsing fails, show what the agent actually returned
+        st.error(f"Agent did not provide structured recommendation. Raw response: {response[:200]}...")
+        return {"drink": "Agent parsing failed", "vibe": "Agent did not provide proper format"}
         
     except Exception as e:
         st.error(f"Error getting AI recommendation: {e}")
@@ -144,16 +184,31 @@ def render_results_scene():
         try:
             recommendation = get_ai_recommendation(mood, location, weather_data)
             if recommendation and 'drink' in recommendation and 'vibe' in recommendation:
-                st.session_state.drink_recommendation = recommendation['drink']
-                st.session_state.vibe_description = recommendation['vibe']
+                # Validate we got actual recommendations, not error messages
+                drink = recommendation['drink']
+                vibe = recommendation['vibe']
+                
+                # Check if we got valid recommendations (but don't auto-retry)
+                if (drink and vibe and 
+                    len(drink.strip()) > 5 and len(vibe.strip()) > 5 and
+                    drink != "Parsing error" and vibe != "Please try again" and
+                    drink != "Agent parsing failed"):
+                    
+                    st.session_state.drink_recommendation = drink
+                    st.session_state.vibe_description = vibe
+                else:
+                    # Show the actual agent failure instead of retrying
+                    st.error(f"Agent failed to provide valid recommendation. Drink: {drink}, Vibe: {vibe}")
+                    st.session_state.drink_recommendation = drink
+                    st.session_state.vibe_description = vibe
             else:
-                st.error("Invalid recommendation format received")
-                st.session_state.drink_recommendation = "Recommendation error"
-                st.session_state.vibe_description = "Please try again"
+                st.error("Agent did not return proper recommendation format")
+                st.session_state.drink_recommendation = "Agent format error"
+                st.session_state.vibe_description = "Agent did not respond correctly"
         except Exception as e:
-            st.error(f"Error generating recommendation: {e}")
-            st.session_state.drink_recommendation = "Error occurred"
-            st.session_state.vibe_description = "Please try again"
+            st.error(f"Agent error: {e}")
+            st.session_state.drink_recommendation = f"Agent exception: {str(e)[:50]}"
+            st.session_state.vibe_description = "Agent failed to respond"
     
     # Show progress bar
     render_progress_bar(4)
@@ -186,9 +241,7 @@ def render_results_scene():
         try:
             st.image("matcha_cafe.png", caption="Matcha Vibe", width=400)
         except:
-            # Fallback to online image if local file doesn't exist
-            st.image("https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400", 
-                    caption="Matcha Vibe", width=400)
+            st.error("Matcha image (matcha_cafe.png) not found. Please check your assets.")
     
     # Action buttons
     st.markdown("<br><br>", unsafe_allow_html=True)

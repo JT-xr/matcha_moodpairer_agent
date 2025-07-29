@@ -20,16 +20,7 @@ def render_welcome_scene():
     try:
         st.image("Welcome_Image2.PNG", use_container_width=True)
     except:
-        # Fallback if image not found
-        st.markdown("""
-        <div class="scene-container">
-            <h1 style="color: #4CAF50; font-size: 60px; margin-bottom: 20px;">Whiski</h1>
-            <p style="font-size: 24px; color: #666; margin-bottom: 20px;">
-                Your AI matcha mood pairer
-            </p>
-            <h1 style="font-size: 80px; text-align: center; margin: 20px 0;">🍵</h1>
-        </div>
-        """, unsafe_allow_html=True)
+        st.error("Welcome image (Welcome_Image2.PNG) not found. Please check your assets.")
 
     # Custom styled start button positioned at bottom
     st.markdown(

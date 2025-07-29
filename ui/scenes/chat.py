@@ -64,13 +64,7 @@ def render_chat_scene():
         try:
             st.image("bot.png", width=700, output_format="PNG")
         except:
-            # Fallback if bot.png not found
-            st.markdown("""
-            <div style="text-align: center; padding: 40px;">
-                <div style="font-size: 150px;">🤖</div>
-                <p style="color: #557937ff; font-weight: bold;">Whiski</p>
-            </div>
-            """, unsafe_allow_html=True)
+            st.error("Bot image (bot.png) not found. Please check your assets.")
     
     # Add some spacing
     st.markdown("<br>", unsafe_allow_html=True)
