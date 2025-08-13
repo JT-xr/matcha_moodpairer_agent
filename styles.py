@@ -138,6 +138,7 @@ def get_recommendation_card_style():
         border-radius: 10px;
         border-left: 10px solid #557937ff;
         height: 100%;
+        margin-bottom: 40px;  /* Add significant bottom spacing for mobile */
     """
 
 def get_cafe_card_style():

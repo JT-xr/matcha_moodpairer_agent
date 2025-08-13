@@ -9,7 +9,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from styles import get_recommendation_card_style, get_cafe_card_style
 
-def render_recommendation_card(drink, vibe, title="🧠 Whiski's Choice"):
+def render_recommendation_card(drink, vibe, title="Whiski's Choice"):
     """
     Render a recommendation card with drink and vibe information
     
