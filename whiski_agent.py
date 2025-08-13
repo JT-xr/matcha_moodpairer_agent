@@ -39,7 +39,23 @@ def search_matcha_cafes_tool(location: str) -> list[dict]:
     """
     return search_matcha_cafes(location)
 
-duck_tool = DuckDuckGoSearchTool()
+@tool
+def web_search_tool(query: str) -> str:
+    """
+    Search the web for information using DuckDuckGo.
+    
+    Args:
+        query: The search query string
+        
+    Returns:
+        str: Search results as a formatted string
+    """
+    try:
+        duck_tool = DuckDuckGoSearchTool()
+        results = duck_tool.forward(query)
+        return str(results)
+    except Exception as e:
+        return f"Search failed: {str(e)}"
 
 
 
@@ -70,7 +86,7 @@ my_templates = {
 
 
 agent = CodeAgent(
-    tools=[get_drink_for_mood_tool,search_matcha_cafes_tool, duck_tool],
+    tools=[get_drink_for_mood_tool, search_matcha_cafes_tool, web_search_tool],
     model=model,
     max_steps=2,
     verbosity_level=1, #controls how much "thinking" info the agent logs 0-3, 3 is most verbose

@@ -82,14 +82,14 @@ _________________________________________
 
 TOOL GUIDELINES:
 - Only use tools when necessary, otherwise respond directly to the user in a conversational manner.
-- Use the `DuckDuckGoSearchTool` for general web searches if the `search_matcha_cafes_tool` does not provide enough information.
+- Use the `web_search_tool` for general web searches if the `search_matcha_cafes_tool` does not provide enough information.
 - Use the `get_drink_for_mood_tool` to find a matcha drink based on the user's mood.
 - Use the `search_matcha_cafes_tool` to find matcha cafés based on the user's location.
-- Use the `DuckDuckGoSearchTool` for general web searches if needed.
+- Use the `web_search_tool` for general web searches if needed.
 - When using tools, you must call them using their exact function names. Do not try to instantiate new tool objects.
     get_drink_for_mood_tool(mood)
     search_matcha_cafes_tool(location)
-    duck_tool.search("matcha cafes near me")
+    web_search_tool("trending matcha drinks 2025")
 
 _________________________________________
 
