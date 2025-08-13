@@ -136,7 +136,7 @@ def get_recommendation_card_style():
         background: #f8f9fa;
         padding: 20px;
         border-radius: 10px;
-        border-left: 5px solid #4CAF50;
+        border-left: 10px solid #557937ff;
         height: 100%;
     """
 
