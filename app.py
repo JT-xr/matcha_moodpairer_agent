@@ -21,7 +21,7 @@ def main():
     """Main application entry point"""
     # Configure Streamlit
     st.set_page_config(
-        page_title="Whiski - AI Matcha Mood Pairer", 
+        page_title="Whiski - AI Agent", 
         page_icon="🍵",
         layout="centered"
     )

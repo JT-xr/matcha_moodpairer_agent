@@ -11,6 +11,8 @@ from styles import get_scene_header_style
 from ..components.progress_bar import render_progress_bar
 from ..components.navigation import render_action_buttons
 from ..utils import SCENES, navigate_to_scene
+from telemetry import langfuse
+from langfuse import observe, get_client
 
 # Import real backend modules
 try:
@@ -20,6 +22,7 @@ except ImportError:
     AGENT_AVAILABLE = False
     st.warning("Whiski agent not available - using fallback mode")
 
+@observe(name="chat.get_ai_response", as_type="generation")
 def get_ai_response(prompt, context=None):
     """
     Get AI response using real Whiski agent
@@ -43,6 +46,9 @@ def get_ai_response(prompt, context=None):
     except Exception as e:
         st.error(f"Error getting AI response: {e}")
         return "I'm having trouble responding right now. Please try again."
+langfuse = get_client()
+langfuse.flush()
+
 
 
 def render_chat_scene():
