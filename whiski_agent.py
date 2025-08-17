@@ -5,9 +5,11 @@ from smolagents import CodeAgent, tool, LiteLLMModel, DuckDuckGoSearchTool, Plan
 from mood_drink_map import get_drink_for_mood
 from cafe_search import search_matcha_cafes
 from templates.main_system_prompt import WHISKI_SYSTEM_PROMPT
+from telemetry import langfuse
+from langfuse import observe, get_client
 
 
-# ── Wire up Gemini 2.5 as the LLM backend (better instruction following than 1.5) ──
+# ── Wire up Gemini 2.5 as the LLM backend
 model = LiteLLMModel(
     system_prompt=WHISKI_SYSTEM_PROMPT,
     model_id="gemini/gemini-2.5-flash",  # Upgraded for better prompt adherence
@@ -17,7 +19,9 @@ model = LiteLLMModel(
 )
 
 
+
 @tool
+#@observe(name="tool.get_drink_for_mood", as_type="tool")  # records input/output/timing
 def get_drink_for_mood_tool(mood: str) -> str:
     """
     Returns a recommended a unique matcha drink for a given mood the user inputs.
@@ -28,7 +32,13 @@ def get_drink_for_mood_tool(mood: str) -> str:
     """
     return get_drink_for_mood(mood)
 
+#langfuse = get_client()
+#langfuse.flush()
+
+
 @tool
+#@observe(name="tool.search_matcha_cafes", as_type="tool")
+
 def search_matcha_cafes_tool(location: str) -> list[dict]:
     """
     Returns a list of matcha cafés in a given location.
@@ -39,7 +49,13 @@ def search_matcha_cafes_tool(location: str) -> list[dict]:
     """
     return search_matcha_cafes(location)
 
+#langfuse = get_client()
+#langfuse.flush()
+
+
 @tool
+@observe(name="tool.web_search", as_type="tool")
+
 def web_search_tool(query: str) -> str:
     """
     Search the web for information using DuckDuckGo.
@@ -57,7 +73,8 @@ def web_search_tool(query: str) -> str:
     except Exception as e:
         return f"Search failed: {str(e)}"
 
-
+langfuse = get_client()
+langfuse.flush()
 
 my_templates = {
     "system_prompt": WHISKI_SYSTEM_PROMPT,
@@ -101,5 +118,5 @@ if __name__ == "__main__":
     
     # Test 1: Simple greeting
     print("Test 1: Simple greeting")
-    resp1 = agent.run("code?")
+    resp1 = agent.run("What is your name?")
     print(f"Response: {resp1}\n")

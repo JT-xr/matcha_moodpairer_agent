@@ -3,11 +3,14 @@
 import requests
 import os
 from dotenv import load_dotenv
+from telemetry import langfuse
+from langfuse import observe, get_client
 
 load_dotenv()
 GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY")
 
-def search_matcha_cafes(location: str, radius=3000):
+@observe(name="tool.search_matcha_cafes", as_type="tool")
+def search_matcha_cafes(location: str, radius=3500):
     url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 
     params = {
@@ -55,3 +58,6 @@ def search_matcha_cafes(location: str, radius=3000):
         })
 
     return cafes
+
+langfuse = get_client()
+langfuse.flush()
