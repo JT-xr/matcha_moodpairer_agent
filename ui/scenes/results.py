@@ -7,6 +7,7 @@ import streamlit as st
 import time
 import sys
 import os
+from langfuse import observe
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from styles import get_scene_header_style
 from ..components.progress_bar import render_progress_bar
@@ -24,6 +25,7 @@ except ImportError as e:
     BACKEND_AVAILABLE = False
     # Backend modules not available - will use fallback mode
 
+@observe(name="pairing_workflow", as_type="workflow")
 def get_ai_recommendation(mood, location, weather_data=None):
     """
     Get AI recommendation using real Whiski agent and the proper template
