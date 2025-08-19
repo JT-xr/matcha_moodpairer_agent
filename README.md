@@ -1,56 +1,127 @@
-# Whiski - Matcha Mood Pairer Agent
+# 🍵 Whiski - Matcha AI Agent
 
-A Streamlit-based application that pairs your mood with the perfect matcha drink and recommends local cafés.
+An intelligent AI application that pairs your current mood with the perfect matcha drink and vibes, plus recommends local cafés. Powered by advanced LLM agentic features, it leverages context-aware reasoning and dynamic tool usage for a tailored personalized experience. The app also has a separate chat feature for users to engage with Whiski to learn about Matcha. Learn more below:
 
-## Features
 
-- **Mood-based Recommendations**: Select your mood and get personalized matcha drink suggestions
-- **Location-aware Café Search**: Find cafés near you with real-time recommendations
-- **Weather Integration**: Weather-aware suggestions for the perfect drink
-- **Interactive Chat**: Engage with the Whiski AI agent for personalized advice
-- **Beautiful UI**: Modern, polished interface with smooth navigation
+## 🌟 Features
+- **Mood-Based Recommendations**: Get personalized matcha drink suggestions based on your current mood
+- **Local Café Search**: Find matcha cafés near you with real-time location-based recommendations
+- **AI-Powered Agent**: Uses Gemini 2.5 for intelligent, context-aware suggestions
+- **LLM Chat Bot**: Chat with the LLM to learn about matcha, get personalized tips, and explore matcha culture
+- **Performance Monitoring**: Integrated with Langfuse for AI observability and performance tracking
 
-## Quick Start
+_________________________________________________________________________
 
-1. **Install Dependencies**:
+
+## 🚀 Quick Start
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/JT-xr/matcha_moodpairer_agent.git
+   cd matcha_moodpairer_agent
+   ```
+
+2. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Set Up Environment Variables**:
+3. **Set Up Environment Variables**
    Create a `.env` file with your API keys:
-   ```
-   GOOGLE_API_KEY=your_gemini_api_key
-   OPENWEATHER_API_KEY=your_weather_api_key
+   ```env
+   GOOGLE_GEMINI_API_KEY=your_gemini_api_key
+   GOOGLE_PLACES_API_KEY=your_places_api_key
+   LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
+   LANGFUSE_SECRET_KEY=your_langfuse_secret_key
    ```
 
-3. **Run the App**:
+4. **Run the Application**
    ```bash
    streamlit run app.py
    ```
 
-## Project Structure
+_________________________________________________________________________
 
-- `app.py` - Main application entry point
-- `ui/` - Modular UI system
-  - `scenes/` - Individual app screens
-  - `components/` - Reusable UI components
-  - `utils.py` - UI utilities
-- `styles.py` - Global CSS styling
-- `whiski_agent.py` - AI agent logic
-- `cafe_search.py` - Café search functionality
-- `weather_api.py` - Weather integration
-- `templates/` - AI prompt templates
-- `backup_files/` - Previous versions and test files
+## 🏗️ Project Structure
 
-## Development
+```
+matcha_moodpairer_agent/
+├── app.py                 # Main application entry point
+├── whiski_agent.py        # AI agent implementation
+├── cafe_search.py         # Café search functionality
+├── mood_drink_map.py      # Mood to drink mapping logic
+├── telemetry.py          # Langfuse integration for monitoring
+├── weather_api.py        # Weather integration
+├── styles.py             # Global CSS styling
+├── requirements.txt      # Project dependencies
+│
+├── ui/                   # Modular UI system
+│   ├── components/       # Reusable UI components
+│   │   ├── buttons.py
+│   │   ├── cards.py
+│   │   ├── navigation.py
+│   │   └── progress_bar.py
+│   │
+│   └── scenes/          # Individual app screens
+│       ├── welcome.py
+│       ├── mood_selection.py
+│       ├── location_input.py
+│       ├── results.py
+│       └── chat.py
+│
+└── templates/           # AI prompt templates
+    └── main_system_prompt.py
+```
 
-The app uses a modular architecture with clean separation between UI components and backend logic. All styling is centralized in `styles.py`, and the UI is built using reusable components from the `ui/` directory.
+## 🔄 Scene Flow (User Journey)
 
-## Migration Notes
+1. **Welcome**: Introduction and app overview
+2. **Mood Selection**: User selects their current mood
+3. **Location Input**: User provides their location
+4. **Loading**: Processing user input
+5. **Results**: Shows drink recommendation and vibe
+6. **Chat**: Separate AI-powered chat for more details
+6. **Cafes**: Separate cafe section for LLM interaction
 
-This app has been fully migrated from a prototype to a production-ready application with:
-- Modular UI architecture
-- Real backend integration
-- Clean, polished UX
-- Production-ready code structure
+
+## 🔧 Core Components
+
+### UI System
+- **Scene-based Architecture**: Each screen is a self-contained scene with its own logic and UI
+- **Component Library**: Reusable UI components for consistent design
+- **Global Styling**: Centralized styling in `styles.py`
+
+### AI Agent
+- **Gemini 2.5 Integration**: Advanced language model for understanding and recommendations
+- **Tool System**: Modular tools for drink recommendations and café searches
+- **Prompt Templates**: Structured templates for consistent AI interactions
+
+### Telemetry
+- **Langfuse Integration**: Monitor AI performance and user interactions
+- **Tracing**: Track function calls and agent decisions
+- **Error Handling**: Comprehensive error tracking and reporting
+
+## 🎨 Styling
+
+The app uses a consistent color palette defined in `styles.py`:
+- Primary Green: `#4CAF50`
+- Background: `#fbf3e2ff`
+- Accent Green: `#557937ff`
+
+Custom styling is applied through:
+- Global CSS in `styles.py`
+- Scene-specific styles in individual scene components
+- Streamlit theme configuration in `.streamlit/config.toml`
+
+
+_________________________________________________________________________
+## 📈 Future Enhancements
+- [ ] Add user profiles and preference saving
+- [ ] Integrate more café data sources
+- [ ] Expand mood recognition capabilities
+- [ ] Add multi-language support
+- [ ] Implement café ratings and reviews
+
+
+## 📝 License
+This project is licensed under the MIT License - see the LICENSE file for details

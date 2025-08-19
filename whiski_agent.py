@@ -47,7 +47,7 @@ def search_matcha_cafes_tool(location: str) -> list[dict]:
 
 
 @tool
-@observe(name="tool.web_search", as_type="tool")
+@observe(name="tool.web_search_tool", as_type="tool")
 
 def web_search_tool(query: str) -> str:
     """
@@ -100,7 +100,7 @@ agent = CodeAgent(
     model=model,
     max_steps=2,
     verbosity_level=1, #controls how much "thinking" info the agent logs 0-3, 3 is most verbose
-    max_print_outputs_length = 300,  # maximum length of the output before truncating,
+    max_print_outputs_length = 500,  # maximum length of the output before truncating,
     prompt_templates=my_templates,  
 )
 

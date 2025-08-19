@@ -7,13 +7,14 @@ import streamlit as st
 import time
 import sys
 import os
-from langfuse import observe
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from styles import get_scene_header_style
 from ..components.progress_bar import render_progress_bar
 from ..components.cards import render_recommendation_card, render_loading_card
 from ..components.navigation import render_action_buttons
 from ..utils import SCENES, navigate_to_scene
+from telemetry import langfuse
+from langfuse import observe, get_client
 
 # Import real backend modules
 try:
@@ -25,7 +26,78 @@ except ImportError as e:
     BACKEND_AVAILABLE = False
     # Backend modules not available - will use fallback mode
 
-@observe(name="pairing_workflow", as_type="workflow")
+@observe(name="agent_generation", as_type="generation")
+def call_whiski_agent(prompt: str) -> str:
+    """
+    Child span: encapsulates the LLM/agent call so Langfuse records a 'generation'
+    with input prompt and raw output.
+    """
+    return agent.run(prompt)
+
+
+@observe(name="parse_response", as_type="tool")
+def parse_agent_response(response: str, mood: str, location: str):
+    """
+    Child span: encapsulates parsing/formatting logic so Langfuse records a 'tool'
+    with the unstructured LLM text as input and the structured drink/vibe dict as output.
+
+    Returns:
+        dict | None: {'drink': str, 'vibe': str} if parsed, otherwise None
+    """
+    import re
+
+    # Method 1: Extract drink and vibe from the structured format
+    drink_match = re.search(r'\*\*(?:The )?Drink:\*\*\s*(.*?)(?=\*\*(?:The )?Vibe:|\n\n|$)', response, re.DOTALL | re.IGNORECASE)
+    vibe_match = re.search(r'\*\*(?:The )?Vibe:\*\*\s*(.*?)(?=$)', response, re.DOTALL | re.IGNORECASE)
+
+    if drink_match and vibe_match:
+        drink_text = drink_match.group(1).strip()
+        vibe_text = vibe_match.group(1).strip()
+
+        # Clean up the text (remove extra asterisks and formatting)
+        drink_clean = re.sub(r'\*\*([^*]+)\*\*', r'\1', drink_text)
+        vibe_clean = re.sub(r'\*\*([^*]+)\*\*', r'\1', vibe_text)
+
+        # Validate that we got actual recommendations, not questions
+        if (len(drink_clean.strip()) > 10 and 
+            "matcha" in drink_clean.lower() and 
+            len(vibe_clean.strip()) > 10 and
+            not any(pattern in drink_clean.lower() for pattern in ["another", "other", "would you", "anything else"])):
+            return {
+                "drink": drink_clean.strip(),
+                "vibe": vibe_clean.strip()
+            }
+
+    # Method 2: Try alternative patterns (fallback)
+    drink_alt = re.search(r'drink:\s*(.*?)(?=vibe:|$)', response, re.DOTALL | re.IGNORECASE)
+    vibe_alt = re.search(r'vibe:\s*(.*?)(?=$)', response, re.DOTALL | re.IGNORECASE)
+
+    if drink_alt and vibe_alt:
+        drink_text = drink_alt.group(1).strip()
+        vibe_text = vibe_alt.group(1).strip()
+
+        if (len(drink_text) > 10 and "matcha" in drink_text.lower() and len(vibe_text) > 10):
+            return {
+                "drink": drink_text,
+                "vibe": vibe_text
+            }
+
+    # Method 3: If response contains matcha content but no clear structure
+    if "matcha" in response.lower():
+        # Extract any matcha-related content but provide a generic structure
+        import re as _re
+        matcha_content = _re.findall(r'[^.]*matcha[^.]*\.?', response, _re.IGNORECASE)
+        if matcha_content:
+            snippet = matcha_content[0]
+            return {
+                "drink": snippet[:80] + ("..." if len(snippet) > 80 else ""),
+                "vibe": f"A perfect {mood} atmosphere in {location} to enjoy your matcha! 🍵"
+            }
+
+    # Parsing failed
+    return None
+
+@observe(name="agent_result_pairing_workflow", as_type="workflow")
 def get_ai_recommendation(mood, location, weather_data=None):
     """
     Get AI recommendation using real Whiski agent and the proper template
@@ -60,13 +132,11 @@ def get_ai_recommendation(mood, location, weather_data=None):
             weather=weather_context
         )
         
-        # Get response from agent
-        response = agent.run(filled_task)
-        
-        # Parse the agent response - handle the actual format the agent uses
-        import re
-        
+        # Get response from agent (child span for generation)
+        response = call_whiski_agent(filled_task)
+
         # Check if this is a conversational response rather than a recommendation
+        import re
         conversational_patterns = [
             r"glad i could help",
             r"is there another",
@@ -75,62 +145,23 @@ def get_ai_recommendation(mood, location, weather_data=None):
             r"other mood",
             r"follow.?up"
         ]
-        
         is_conversational = any(re.search(pattern, response, re.IGNORECASE) for pattern in conversational_patterns)
-        
+
         if is_conversational:
             # This is a conversational response, not a recommendation
             # Try to re-prompt with a more direct approach
-            direct_prompt = f"Recommend a specific matcha drink and café vibe for someone feeling {mood} in {location} with {weather_context} weather. Format: **The Drink:** [recommendation] **The Vibe:** [description]"
-            response = agent.run(direct_prompt)
-        
-        # Method 1: Extract drink and vibe from the structured format
-        drink_match = re.search(r'\*\*(?:The )?Drink:\*\*\s*(.*?)(?=\*\*(?:The )?Vibe:|\n\n|$)', response, re.DOTALL | re.IGNORECASE)
-        vibe_match = re.search(r'\*\*(?:The )?Vibe:\*\*\s*(.*?)(?=$)', response, re.DOTALL | re.IGNORECASE)
-        
-        if drink_match and vibe_match:
-            drink_text = drink_match.group(1).strip()
-            vibe_text = vibe_match.group(1).strip()
-            
-            # Clean up the text (remove extra asterisks and formatting)
-            drink_clean = re.sub(r'\*\*([^*]+)\*\*', r'\1', drink_text)
-            vibe_clean = re.sub(r'\*\*([^*]+)\*\*', r'\1', vibe_text)
-            
-            # Validate that we got actual recommendations, not questions
-            if (len(drink_clean.strip()) > 10 and 
-                "matcha" in drink_clean.lower() and 
-                len(vibe_clean.strip()) > 10 and
-                not any(pattern in drink_clean.lower() for pattern in ["another", "other", "would you", "anything else"])):
-                
-                return {
-                    "drink": drink_clean.strip(),
-                    "vibe": vibe_clean.strip()
-                }
-        
-        # Method 2: Try alternative patterns (fallback)
-        drink_alt = re.search(r'drink:\s*(.*?)(?=vibe:|$)', response, re.DOTALL | re.IGNORECASE)
-        vibe_alt = re.search(r'vibe:\s*(.*?)(?=$)', response, re.DOTALL | re.IGNORECASE)
-        
-        if drink_alt and vibe_alt:
-            drink_text = drink_alt.group(1).strip()
-            vibe_text = vibe_alt.group(1).strip()
-            
-            if (len(drink_text) > 10 and "matcha" in drink_text.lower() and len(vibe_text) > 10):
-                return {
-                    "drink": drink_text,
-                    "vibe": vibe_text
-                }
-        
-        # Method 3: If response contains matcha content but no clear structure
-        if "matcha" in response.lower():
-            # Extract any matcha-related content but provide a generic structure
-            matcha_content = re.findall(r'[^.]*matcha[^.]*\.?', response, re.IGNORECASE)
-            if matcha_content:
-                return {
-                    "drink": matcha_content[0][:80] + ("..." if len(matcha_content[0]) > 80 else ""),
-                    "vibe": f"A perfect {mood} atmosphere in {location} to enjoy your matcha! 🍵"
-                }
-        
+            direct_prompt = (
+                f"Recommend a specific matcha drink and café vibe for someone feeling {mood} "
+                f"in {location} with {weather_context} weather. "
+                f"Format: **The Drink:** [recommendation] **The Vibe:** [description]"
+            )
+            response = call_whiski_agent(direct_prompt)
+
+        # Parse (child span for tool)
+        parsed = parse_agent_response(response, mood, location)
+        if parsed is not None:
+            return parsed
+
         # If all parsing fails, show what the agent actually returned
         st.error(f"Agent did not provide structured recommendation. Raw response: {response[:200]}...")
         return {"drink": "Agent parsing failed", "vibe": "Agent did not provide proper format"}
@@ -138,6 +169,10 @@ def get_ai_recommendation(mood, location, weather_data=None):
     except Exception as e:
         st.error(f"Error getting AI recommendation: {e}")
         return {"drink": "Error occurred", "vibe": "Please try again"}
+
+langfuse = get_client()
+langfuse.flush()
+
 
 def show_loading_process():
     """Show loading animation while processing recommendation"""

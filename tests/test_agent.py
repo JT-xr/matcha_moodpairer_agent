@@ -1,7 +1,7 @@
 # test_agent.py
 import os
 from smolagents import CodeAgent, tool, LiteLLMModel, PlanningPromptTemplate, ManagedAgentPromptTemplate, FinalAnswerPromptTemplate
-from templates.prompt_test_agent import DEFAULT_SYSTEM_PROMPT
+from tests.prompt_test_agent import DEFAULT_SYSTEM_PROMPT
 
 # ── Wire up Gemini as the LLM backend ──
 model = LiteLLMModel(

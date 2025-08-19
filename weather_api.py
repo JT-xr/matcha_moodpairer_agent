@@ -7,7 +7,7 @@ from langfuse import observe, get_client
 load_dotenv()
 
 #🌤️ Weather in NYC
-@observe(name="weather.get_nyc_weather", as_type="generation")
+@observe(name="api.get_nyc_weather", as_type="generation")
 def get_nyc_weather():
     try:
         weather_resp = requests.get(
