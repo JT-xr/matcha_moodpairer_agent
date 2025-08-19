@@ -16,5 +16,5 @@ def get_drink_for_mood(mood: str) -> str:
     }
     return mapping.get(mood, "Classic matcha latte")
 
-langfuse = get_client()
-langfuse.flush()
+#langfuse = get_client()
+#langfuse.flush()
