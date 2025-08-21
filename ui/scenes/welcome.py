@@ -18,9 +18,9 @@ def render_welcome_scene():
     
     # Full-screen splash image
     try:
-        st.image("Welcome_Image2.PNG", use_container_width=True)
+        st.image("welcome_image.png", use_container_width=True)
     except:
-        st.error("Welcome image (Welcome_Image2.PNG) not found. Please check your assets.")
+        st.error("Welcome image (welcome_image.png) not found. Please check your assets.")
 
     # Custom styled start button positioned at bottom
     st.markdown(

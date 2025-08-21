@@ -4,4 +4,6 @@ python-dotenv
 requests
 litellm
 duckduckgo-search
+langfuse
 git+https://github.com/huggingface/smolagents.git
+

@@ -34,7 +34,7 @@ def get_drink_for_mood_tool(mood: str) -> str:
 
 
 @tool
-@observe(name="tool.search_matcha_cafes", as_type="tool")
+#@observe(name="tool.search_matcha_cafes", as_type="tool")
 def search_matcha_cafes_tool(location: str) -> list[dict]:
     """
     Returns a list of matcha cafés in a given location.
