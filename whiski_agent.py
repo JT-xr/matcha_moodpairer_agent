@@ -21,6 +21,7 @@ model = LiteLLMModel(
 
 
 @tool
+@observe(name="tool.get_drink_for_mood", as_type="tool")
 def get_drink_for_mood_tool(mood: str) -> str:
     """
     Returns a recommended a unique matcha drink for a given mood the user inputs.
@@ -31,10 +32,12 @@ def get_drink_for_mood_tool(mood: str) -> str:
     """
     return get_drink_for_mood(mood)
 
+langfuse = get_client()
+langfuse.flush()
 
 
 @tool
-#@observe(name="tool.search_matcha_cafes", as_type="tool")
+@observe(name="tool.search_matcha_cafes", as_type="tool")
 def search_matcha_cafes_tool(location: str) -> list[dict]:
     """
     Returns a list of matcha cafés in a given location.
@@ -45,8 +48,8 @@ def search_matcha_cafes_tool(location: str) -> list[dict]:
     """
     return search_matcha_cafes(location)
 
-#langfuse = get_client()
-#langfuse.flush()
+langfuse = get_client()
+langfuse.flush()
 
 @tool
 @observe(name="tool.web_search_tool", as_type="tool")

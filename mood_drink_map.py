@@ -3,7 +3,7 @@
 from telemetry import langfuse
 from langfuse import observe, get_client
 
-@observe(name="tool.get_drink_for_mood", as_type="tool")  #langfuse tracing tool for mood
+#@observe(name="tool.get_drink_for_mood", as_type="tool")  #langfuse tracing tool for mood
 def get_drink_for_mood(mood: str) -> str:
     mood = mood.lower()
     mapping = {
@@ -16,5 +16,5 @@ def get_drink_for_mood(mood: str) -> str:
     }
     return mapping.get(mood, "Classic matcha latte")
 
-langfuse = get_client()
-langfuse.flush()
+#langfuse = get_client()
+#langfuse.flush()
